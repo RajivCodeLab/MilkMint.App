@@ -1,0 +1,2205 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/v1/auth/resolve": {
+      "post": {
+        "description": "Called after Firebase authentication. Creates new user or returns existing user with role resolution.",
+        "operationId": "AuthController_resolveUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User resolved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "user": {
+                      "uid": "firebase_uid_123",
+                      "phone": "+919876543210",
+                      "role": "vendor",
+                      "vendorId": "firebase_uid_123",
+                      "language": "en",
+                      "fcmTokens": [
+                        "fcm_token_here"
+                      ],
+                      "isActive": true
+                    },
+                    "isNewUser": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid Firebase token"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Resolve user role and create/fetch user profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/fcm-token": {
+      "post": {
+        "operationId": "AuthController_addFcmToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFcmTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "FCM token added successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Add FCM token for push notifications",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_removeFcmToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveFcmTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "FCM token removed successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Remove FCM token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/language": {
+      "put": {
+        "operationId": "AuthController_updateLanguage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLanguageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Language updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Update user language preference",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "description": "Returns the authenticated user's profile information",
+        "operationId": "UsersController_getCurrentUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/v1/users/{uid}": {
+      "get": {
+        "description": "Vendors can retrieve user details by UID",
+        "operationId": "UsersController_getUserByUid",
+        "parameters": [
+          {
+            "name": "uid",
+            "required": true,
+            "in": "path",
+            "description": "Firebase UID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found"
+          },
+          "403": {
+            "description": "Forbidden - Vendor role required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get user by UID (Admin only)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/v1/users/search-by-phone": {
+      "post": {
+        "description": "Vendors can search for users by phone number",
+        "operationId": "UsersController_getUserByPhone",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUserByPhoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User found or not found"
+          },
+          "403": {
+            "description": "Forbidden - Vendor role required"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Search user by phone number (Admin only)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/v1/users/{uid}/language": {
+      "put": {
+        "operationId": "UsersController_updateLanguage",
+        "parameters": [
+          {
+            "name": "uid",
+            "required": true,
+            "in": "path",
+            "description": "Firebase UID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserLanguageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Language updated successfully"
+          },
+          "403": {
+            "description": "Can only update own language"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Update user language preference",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/v1/users/{uid}/fcm-token": {
+      "post": {
+        "operationId": "UsersController_addFcmToken",
+        "parameters": [
+          {
+            "name": "uid",
+            "required": true,
+            "in": "path",
+            "description": "Firebase UID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUserFcmTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "FCM token added successfully"
+          },
+          "403": {
+            "description": "Can only add token to own account"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Add FCM token to user",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_removeFcmToken",
+        "parameters": [
+          {
+            "name": "uid",
+            "required": true,
+            "in": "path",
+            "description": "Firebase UID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveUserFcmTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "FCM token removed successfully"
+          },
+          "403": {
+            "description": "Can only remove token from own account"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Remove FCM token from user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/v1/customers": {
+      "get": {
+        "operationId": "CustomersController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of customers retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Vendor role required"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get all customers for a vendor (paginated)",
+        "tags": [
+          "customers"
+        ]
+      },
+      "post": {
+        "operationId": "CustomersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "409": {
+            "description": "Customer already exists"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Create a new customer",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customers/{id}": {
+      "get": {
+        "operationId": "CustomersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get a specific customer by ID",
+        "tags": [
+          "customers"
+        ]
+      },
+      "patch": {
+        "operationId": "CustomersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer updated successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Update a customer",
+        "tags": [
+          "customers"
+        ]
+      },
+      "delete": {
+        "operationId": "CustomersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Customer deleted successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Delete a customer (soft delete)",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/delivery-logs": {
+      "post": {
+        "operationId": "DeliveryLogsController_createLog",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeliveryLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Delivery log created/updated successfully"
+          },
+          "403": {
+            "description": "Customer does not belong to vendor"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Create or update a delivery log (upsert)",
+        "tags": [
+          "delivery-logs"
+        ]
+      },
+      "get": {
+        "operationId": "DeliveryLogsController_getLogsByDateRange",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery logs retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get delivery logs by date range",
+        "tags": [
+          "delivery-logs"
+        ]
+      }
+    },
+    "/v1/delivery-logs/batch": {
+      "post": {
+        "description": "Accepts array of delivery logs and upserts them. Returns success/failure count.",
+        "operationId": "DeliveryLogsController_batchCreateLogs",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeliveryLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch operation completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": 10,
+                    "failed": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Batch create/update delivery logs (for offline sync)",
+        "tags": [
+          "delivery-logs"
+        ]
+      }
+    },
+    "/v1/delivery-logs/customer": {
+      "get": {
+        "operationId": "DeliveryLogsController_getLogsByCustomer",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer delivery logs retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get delivery logs for a specific customer",
+        "tags": [
+          "delivery-logs"
+        ]
+      }
+    },
+    "/v1/delivery-logs/monthly-summary": {
+      "get": {
+        "description": "Returns total quantity and delivery count per customer for a given month",
+        "operationId": "DeliveryLogsController_getMonthlySummary",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": 11,
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": 2025,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly summary retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get monthly aggregated delivery summary",
+        "tags": [
+          "delivery-logs"
+        ]
+      }
+    },
+    "/v1/holidays": {
+      "post": {
+        "description": "Customers can request holidays for a date range. Auto-approved in MVP.",
+        "operationId": "HolidaysController_createHoliday",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHolidayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Holiday created successfully"
+          },
+          "400": {
+            "description": "Invalid date range"
+          },
+          "403": {
+            "description": "Customer does not belong to vendor"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Request a holiday",
+        "tags": [
+          "holidays"
+        ]
+      },
+      "get": {
+        "operationId": "HolidaysController_getHolidays",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Holidays retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get all holidays for vendor (paginated)",
+        "tags": [
+          "holidays"
+        ]
+      }
+    },
+    "/v1/holidays/upcoming": {
+      "get": {
+        "description": "Returns all approved holidays starting from today",
+        "operationId": "HolidaysController_getUpcomingHolidays",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Upcoming holidays retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get upcoming holidays",
+        "tags": [
+          "holidays"
+        ]
+      }
+    },
+    "/v1/holidays/customer/{customerId}": {
+      "get": {
+        "operationId": "HolidaysController_getCustomerHolidays",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "path",
+            "description": "Customer ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer holidays retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get holidays for a specific customer",
+        "tags": [
+          "holidays"
+        ]
+      }
+    },
+    "/v1/holidays/{id}": {
+      "get": {
+        "operationId": "HolidaysController_getHolidayById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Holiday ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Holiday retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Holiday not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get a specific holiday by ID",
+        "tags": [
+          "holidays"
+        ]
+      },
+      "delete": {
+        "description": "Vendors can cancel any holiday, customers can only cancel their own",
+        "operationId": "HolidaysController_cancelHoliday",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Holiday ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Holiday cancelled successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Holiday not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Cancel a holiday",
+        "tags": [
+          "holidays"
+        ]
+      }
+    },
+    "/v1/holidays/{id}/status": {
+      "patch": {
+        "description": "Vendors can approve or reject holiday requests",
+        "operationId": "HolidaysController_updateHolidayStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Holiday ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHolidayStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Holiday status updated successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Holiday not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Update holiday status (vendor only)",
+        "tags": [
+          "holidays"
+        ]
+      }
+    },
+    "/v1/notifications/send": {
+      "post": {
+        "description": "Send push notification to a specific user by userId",
+        "operationId": "NotificationsController_sendNotification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendNotificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification sent successfully"
+          },
+          "404": {
+            "description": "User not found or no FCM tokens"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Send notification to a user",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/v1/notifications/send-bulk": {
+      "post": {
+        "description": "Send push notification to multiple FCM tokens at once",
+        "operationId": "NotificationsController_sendBulkNotification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkNotificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk notification sent"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Send notification to multiple tokens",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/v1/invoices/generate": {
+      "post": {
+        "description": "Generate invoices for all customers for a given month. Skips customers with no deliveries.",
+        "operationId": "InvoicesController_generateInvoices",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateInvoicesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invoices generated successfully"
+          },
+          "400": {
+            "description": "Invalid month format"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Generate monthly invoices (manual trigger)",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/invoices": {
+      "get": {
+        "operationId": "InvoicesController_getInvoices",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11",
+              "type": "string"
+            }
+          },
+          {
+            "name": "paid",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoices retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get all invoices for vendor (paginated)",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/invoices/unpaid": {
+      "get": {
+        "operationId": "InvoicesController_getUnpaidInvoices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Unpaid invoices retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get all unpaid invoices",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/invoices/stats": {
+      "get": {
+        "description": "Returns total, paid, unpaid invoices and revenue stats",
+        "operationId": "InvoicesController_getInvoiceStats",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice stats retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get invoice statistics",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/invoices/{id}": {
+      "get": {
+        "operationId": "InvoicesController_getInvoiceById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Invoice ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Invoice not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get a specific invoice by ID",
+        "tags": [
+          "invoices"
+        ]
+      },
+      "delete": {
+        "description": "Soft delete an invoice (sets active to false)",
+        "operationId": "InvoicesController_deleteInvoice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Invoice ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Invoice deleted successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Invoice not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Delete an invoice",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/invoices/{id}/mark-paid": {
+      "patch": {
+        "description": "Updates invoice status to paid and records payment timestamp",
+        "operationId": "InvoicesController_markInvoiceAsPaid",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Invoice ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice marked as paid successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Invoice not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Mark an invoice as paid",
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/v1/payments": {
+      "post": {
+        "description": "Vendor records payment received from customer (Cash/UPI/Online)",
+        "operationId": "PaymentsController_recordPayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment recorded successfully"
+          },
+          "400": {
+            "description": "Invalid input or invoice mismatch"
+          },
+          "403": {
+            "description": "Customer does not belong to vendor"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Record a new payment",
+        "tags": [
+          "payments"
+        ]
+      },
+      "get": {
+        "operationId": "PaymentsController_getPayments",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "cash",
+                "upi",
+                "online",
+                "bank_transfer"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-30",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get all payments for vendor (paginated)",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/v1/payments/stats": {
+      "get": {
+        "description": "Returns total payments, amount breakdown by mode",
+        "operationId": "PaymentsController_getPaymentStats",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-11-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment stats retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get payment statistics",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/v1/payments/customer/{customerId}": {
+      "get": {
+        "operationId": "PaymentsController_getCustomerPayments",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "path",
+            "description": "Customer ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer payments retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get payments for a specific customer",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/v1/payments/invoice/{invoiceId}": {
+      "get": {
+        "operationId": "PaymentsController_getInvoicePayments",
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "required": true,
+            "in": "path",
+            "description": "Invoice ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice payments retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get payments for a specific invoice",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/v1/payments/{id}": {
+      "get": {
+        "operationId": "PaymentsController_getPaymentById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment retrieved successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Get a specific payment by ID",
+        "tags": [
+          "payments"
+        ]
+      },
+      "delete": {
+        "description": "Soft delete a payment record (sets active to false)",
+        "operationId": "PaymentsController_deletePayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Payment deleted successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Delete a payment",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/v1/payments/{id}/status": {
+      "patch": {
+        "description": "Update payment status to pending/completed/failed",
+        "operationId": "PaymentsController_updatePaymentStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePaymentStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment status updated successfully"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "security": [
+          {
+            "firebase-auth": []
+          }
+        ],
+        "summary": "Update payment status",
+        "tags": [
+          "payments"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "MilkBill API",
+    "description": "Backend API for MilkBill - Milk Delivery Management System",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication & Authorization"
+    },
+    {
+      "name": "users",
+      "description": "User Profile Management"
+    },
+    {
+      "name": "vendors",
+      "description": "Vendor Business Management"
+    },
+    {
+      "name": "customers",
+      "description": "Customer Management"
+    },
+    {
+      "name": "delivery-logs",
+      "description": "Daily Delivery Tracking"
+    },
+    {
+      "name": "invoices",
+      "description": "Monthly Billing & Invoices"
+    },
+    {
+      "name": "payments",
+      "description": "Payment Tracking"
+    },
+    {
+      "name": "holidays",
+      "description": "Customer Holiday Requests"
+    },
+    {
+      "name": "notifications",
+      "description": "Push Notifications"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "firebase-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Enter Firebase ID Token"
+      }
+    },
+    "schemas": {
+      "ResolveUserDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "User phone number",
+            "example": "+919876543210"
+          },
+          "language": {
+            "type": "string",
+            "description": "Preferred language",
+            "enum": [
+              "en",
+              "hi",
+              "kn"
+            ],
+            "default": "en"
+          },
+          "fcmToken": {
+            "type": "string",
+            "description": "FCM token for push notifications"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "AddFcmTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "FCM device token",
+            "example": "fcm_token_string_here"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RemoveFcmTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "FCM device token to remove",
+            "example": "fcm_token_string_here"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "UpdateLanguageDto": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Preferred language",
+            "enum": [
+              "en",
+              "hi",
+              "kn"
+            ]
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "GetUserByPhoneDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "User phone number",
+            "example": "+919876543210"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "UpdateUserLanguageDto": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "User language preference",
+            "enum": [
+              "en",
+              "hi",
+              "kn"
+            ],
+            "example": "en"
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "AddUserFcmTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "FCM device token",
+            "example": "fcm_token_string_here"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RemoveUserFcmTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "FCM device token to remove",
+            "example": "fcm_token_string_here"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CreateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Customer name",
+            "example": "Rajesh Kumar"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Customer phone number",
+            "example": "+919876543210"
+          },
+          "address": {
+            "type": "string",
+            "description": "Customer address",
+            "example": "#123, MG Road, Bangalore"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of milk per delivery (in liters)",
+            "example": 1,
+            "minimum": 0.5
+          },
+          "rate": {
+            "type": "number",
+            "description": "Rate per liter",
+            "example": 50,
+            "minimum": 0
+          },
+          "frequency": {
+            "type": "string",
+            "description": "Delivery frequency",
+            "enum": [
+              "daily",
+              "alternate",
+              "custom"
+            ],
+            "default": "daily"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "quantity",
+          "rate",
+          "frequency"
+        ]
+      },
+      "UpdateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0.5
+          },
+          "rate": {
+            "type": "number",
+            "minimum": 0
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "alternate",
+              "custom"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateDeliveryLogDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID (MongoDB ObjectId)"
+          },
+          "date": {
+            "type": "string",
+            "description": "Delivery date (ISO 8601 format)",
+            "example": "2025-11-15"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "Whether delivery was made",
+            "default": true
+          },
+          "quantityDelivered": {
+            "type": "number",
+            "description": "Quantity delivered in liters",
+            "example": 1,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "customerId",
+          "date",
+          "delivered",
+          "quantityDelivered"
+        ]
+      },
+      "BatchDeliveryLogDto": {
+        "type": "object",
+        "properties": {
+          "logs": {
+            "description": "Array of delivery logs (for offline sync)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateDeliveryLogDto"
+            }
+          }
+        },
+        "required": [
+          "logs"
+        ]
+      },
+      "CreateHolidayDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID (MongoDB ObjectId)"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Holiday start date (ISO 8601)",
+            "example": "2025-11-20"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Holiday end date (ISO 8601)",
+            "example": "2025-11-25"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for holiday",
+            "example": "Going on vacation"
+          }
+        },
+        "required": [
+          "customerId",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "UpdateHolidayStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Holiday status",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ]
+          },
+          "vendorNotes": {
+            "type": "string",
+            "description": "Vendor notes"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "SendNotificationDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Recipient user ID (UID)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title"
+          },
+          "body": {
+            "type": "string",
+            "description": "Notification body text"
+          },
+          "data": {
+            "type": "object",
+            "description": "Additional data payload",
+            "example": {
+              "type": "invoice",
+              "invoiceId": "12345"
+            }
+          }
+        },
+        "required": [
+          "userId",
+          "title",
+          "body"
+        ]
+      },
+      "SendBulkNotificationDto": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "description": "Array of FCM tokens",
+            "example": [
+              "token1",
+              "token2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title"
+          },
+          "body": {
+            "type": "string",
+            "description": "Notification body text"
+          },
+          "data": {
+            "type": "object",
+            "description": "Additional data payload"
+          }
+        },
+        "required": [
+          "tokens",
+          "title",
+          "body"
+        ]
+      },
+      "GenerateInvoicesDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "Month for which to generate invoices (YYYY-MM)",
+            "example": "2025-11"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force regenerate even if invoices exist",
+            "default": false
+          }
+        },
+        "required": [
+          "month"
+        ]
+      },
+      "RecordPaymentDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID (MongoDB ObjectId)"
+          },
+          "invoiceId": {
+            "type": "string",
+            "description": "Invoice ID (optional, link payment to invoice)"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Payment amount",
+            "example": 500
+          },
+          "mode": {
+            "type": "string",
+            "description": "Payment mode",
+            "enum": [
+              "cash",
+              "upi",
+              "online",
+              "bank_transfer"
+            ]
+          },
+          "paymentDate": {
+            "type": "string",
+            "description": "Payment date (ISO 8601)",
+            "example": "2025-11-15"
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID (for UPI/Online payments)"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes"
+          }
+        },
+        "required": [
+          "customerId",
+          "amount",
+          "mode",
+          "paymentDate"
+        ]
+      },
+      "UpdatePaymentStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Payment status",
+            "enum": [
+              "pending",
+              "completed",
+              "failed"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    }
+  }
+}

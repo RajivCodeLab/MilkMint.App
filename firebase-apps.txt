@@ -1,0 +1,10 @@
+dart pub global run flutterfire_cli:flutterfire configure
+
+Firebase configuration file lib\firebase_options.dart generated successfully with the following Firebase apps:
+
+Platform  Firebase App Id
+web       1:404484728694:web:c22a84e4eff51ab9567c57
+android   1:404484728694:android:4f3338d92ef8cb2e567c57
+ios       1:404484728694:ios:16ebdece022b255a567c57
+macos     1:404484728694:ios:16ebdece022b255a567c57
+windows   1:404484728694:web:b156a1b8c78cb3c3567c57
