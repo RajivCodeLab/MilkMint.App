@@ -3,12 +3,12 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'MilkBill';
+  static const String appName = 'MilkMint';
   static const String appVersion = '0.1.0';
 
   // API Configuration
   static const String baseUrl =
-      'https://your-api-url.com/api'; // Update with actual backend URL
+      'http://localhost:3000/v1'; // Updated to match backend route
   static const Duration apiTimeout = Duration(seconds: 30);
   static const Duration connectionTimeout = Duration(seconds: 30);
 

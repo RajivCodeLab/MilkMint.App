@@ -147,9 +147,9 @@ class AppTextField extends StatelessWidget {
       inputFormatters: inputFormatters,
       validator: validator,
       focusNode: focusNode,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 15,
-        color: AppColors.textPrimary,
+        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
       ),
       decoration: InputDecoration(
         labelText: label,
@@ -158,10 +158,10 @@ class AppTextField extends StatelessWidget {
         errorText: errorText,
         filled: true,
         fillColor: variant == AppTextFieldVariant.filled
-            ? AppColors.grey.withOpacity(0.5)
+            ? AppColors.grey.withValues(alpha: 0.5)
             : (isDark 
                 ? AppColors.surfaceDark 
-                : Colors.white.withOpacity(0.8)),
+                : Colors.white.withValues(alpha: 0.8)),
         contentPadding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         prefixIcon: prefixIcon != null
@@ -182,7 +182,7 @@ class AppTextField extends StatelessWidget {
         ),
         hintStyle: TextStyle(
           fontSize: 15,
-          color: AppColors.textSecondary.withOpacity(0.6),
+          color: AppColors.textSecondary.withValues(alpha: 0.6),
         ),
         helperStyle: const TextStyle(
           fontSize: 13,
@@ -267,7 +267,7 @@ class AppTextField extends StatelessWidget {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: AppColors.grey.withOpacity(0.5),
+        color: AppColors.grey.withValues(alpha: 0.5),
         width: 1.5,
       ),
     );
@@ -399,3 +399,4 @@ class AppOtpTextField extends StatelessWidget {
     );
   }
 }
+

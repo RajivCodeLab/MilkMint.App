@@ -55,6 +55,14 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
             arguments: user,
           );
         },
+        requiresOnboarding: (user) {
+          setState(() => _isLoading = false);
+          // Navigate to onboarding screen
+          Navigator.pushReplacementNamed(
+            context,
+            '/onboarding',
+          );
+        },
         error: (message) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(

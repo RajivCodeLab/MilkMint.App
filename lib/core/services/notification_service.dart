@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../api/api_client.dart';
+import '../models/notification_item.dart';
+import '../storage/notifications_local_ds.dart';
 
 part 'notification_service.freezed.dart';
 
@@ -42,12 +43,12 @@ class NotificationState with _$NotificationState {
 class NotificationService {
   NotificationService({
     required FirebaseMessaging messaging,
-    required ApiClient apiClient,
-  })  : _messaging = messaging,
-        _apiClient = apiClient;
+    required NotificationsLocalDataSource notificationsLocalDataSource,
+  }) : _messaging = messaging,
+       _notificationsLocalDataSource = notificationsLocalDataSource;
 
   final FirebaseMessaging _messaging;
-  final ApiClient _apiClient;
+  final NotificationsLocalDataSource _notificationsLocalDataSource;
 
   final _stateController = StreamController<NotificationState>.broadcast();
   Stream<NotificationState> get stateStream => _stateController.stream;
@@ -180,6 +181,9 @@ class NotificationService {
     debugPrint('  Body: ${message.notification?.body}');
     debugPrint('  Data: ${message.data}');
 
+    // Save notification to local storage
+    _saveNotificationToLocal(message);
+
     // Show local notification or in-app notification
     _showInAppNotification(message);
 
@@ -195,8 +199,27 @@ class NotificationService {
     debugPrint('👆 Notification tapped');
     debugPrint('  Data: ${message.data}');
 
+    // Save notification to local storage
+    _saveNotificationToLocal(message);
+
     final payload = NotificationPayload.fromRemoteMessage(message);
     _navigateToScreen(payload);
+  }
+
+  /// Save notification to local storage
+  Future<void> _saveNotificationToLocal(RemoteMessage message) async {
+    try {
+      final notificationItem = NotificationItem.fromRemoteMessage(
+        messageId: message.messageId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        title: message.notification?.title,
+        body: message.notification?.body,
+        data: message.data,
+      );
+      await _notificationsLocalDataSource.saveNotification(notificationItem);
+      debugPrint('💾 Notification saved to local storage');
+    } catch (e) {
+      debugPrint('⚠️ Error saving notification to local storage: $e');
+    }
   }
 
   /// Check for initial message (app opened from terminated state)
@@ -464,11 +487,11 @@ final firebaseMessagingProvider = Provider<FirebaseMessaging>((ref) {
 /// Provider for NotificationService
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   final messaging = ref.watch(firebaseMessagingProvider);
-  final apiClient = ref.watch(apiClientProvider);
+  final notificationsLocalDataSource = NotificationsLocalDataSource();
 
   final service = NotificationService(
     messaging: messaging,
-    apiClient: apiClient,
+    notificationsLocalDataSource: notificationsLocalDataSource,
   );
 
   ref.onDispose(() {

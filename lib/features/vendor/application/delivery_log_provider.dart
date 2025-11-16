@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/delivery/delivery_log.dart';
 import '../../../core/offline/offline_sync_service.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Delivery log state
 class DeliveryLogState {
@@ -57,8 +58,9 @@ class DeliveryLogState {
 /// Delivery log notifier
 class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
   final OfflineSyncService _syncService;
+  final Ref _ref;
 
-  DeliveryLogNotifier(this._syncService)
+  DeliveryLogNotifier(this._syncService, this._ref)
       : super(DeliveryLogState()) {
     _initSyncListener();
   }
@@ -76,17 +78,23 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final remoteDs = _ref.read(deliveryLogRemoteDataSourceProvider);
+      final selectedDate = date ?? DateTime.now();
+      
+      // Load from API with date range
+      final startDate = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+      final endDate = startDate.add(const Duration(days: 1));
+      
+      final apiLogs = await remoteDs.getLogsByDateRange(
+        startDate: startDate,
+        endDate: endDate,
+      );
       
       // Load from offline queue
       final queuedLogs = await _syncService.getPendingDeliveryLogs();
       
-      // Mock data for development
-      final mockLogs = _generateMockLogs(date ?? DateTime.now());
-      
       state = state.copyWith(
-        logs: [...mockLogs, ...queuedLogs],
+        logs: [...apiLogs, ...queuedLogs],
         isLoading: false,
         pendingSyncCount: queuedLogs.length,
         selectedDate: date,
@@ -227,16 +235,11 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
   }  void clearError() {
     state = state.copyWith(error: null);
   }
-
-  List<DeliveryLog> _generateMockLogs(DateTime date) {
-    // Generate mock logs for testing
-    return [];
-  }
 }
 
 /// Providers
 final deliveryLogProvider =
     StateNotifierProvider<DeliveryLogNotifier, DeliveryLogState>((ref) {
   final syncService = ref.watch(offlineSyncServiceProvider);
-  return DeliveryLogNotifier(syncService);
+  return DeliveryLogNotifier(syncService, ref);
 });

@@ -121,7 +121,7 @@ class DeliveryCompletionCard extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: Navigate to pending deliveries
+                    Navigator.pushNamed(context, '/delivery-log');
                   },
                   icon: const Icon(Icons.list_alt, size: 20),
                   label: const Text('View Pending Deliveries'),

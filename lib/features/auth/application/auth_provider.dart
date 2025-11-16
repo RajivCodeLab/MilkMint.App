@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_service.dart';
+import '../../../core/auth/firebase_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../data/data_sources/local/auth_local_ds.dart';
 import '../../../data/data_sources/remote/auth_remote_ds.dart';
@@ -38,11 +39,18 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final localDataSource = ref.watch(authLocalDataSourceProvider);
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
 
-  return AuthRepositoryImpl(
+  final repository = AuthRepositoryImpl(
     authService,
     localDataSource,
     remoteDataSource,
   );
+  
+  // Set up FCM token refresh callback
+  FirebaseService.onTokenRefresh = (token) {
+    repository.updateFcmToken(token);
+  };
+
+  return repository;
 });
 
 /// Auth state notifier provider

@@ -49,6 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         verifyingOtp: () {},
         authenticating: () {},
         authenticated: (user) {},
+        requiresOnboarding: (user) {},
         error: (message) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(

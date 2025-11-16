@@ -22,6 +22,9 @@ class ApiClient {
           final token = await _authService.getIdToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
+            debugPrint('🔑 Auth Token: ${token.substring(0, 20)}...');
+          } else {
+            debugPrint('⚠️ No auth token available - user not logged in');
           }
 
           // Add default headers
@@ -42,8 +45,10 @@ class ApiClient {
             'ERROR[${error.response?.statusCode}] => ${error.requestOptions.uri}',
           );
 
-          // Handle token expiration
-          if (error.response?.statusCode == 401) {
+          // Handle token expiration (but not for auth endpoints)
+          final isAuthEndpoint = error.requestOptions.path.contains('/auth/');
+          
+          if (error.response?.statusCode == 401 && !isAuthEndpoint) {
             try {
               // Refresh token
               final newToken = await _authService.getIdToken(forceRefresh: true);
@@ -191,8 +196,11 @@ class ApiClient {
 
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
-        final message = error.response?.data?['message'] as String? ??
-            'Something went wrong';
+        // Handle message as either String or List
+        final messageData = error.response?.data?['message'];
+        final message = messageData is List
+            ? messageData.join(', ')
+            : (messageData as String? ?? 'Something went wrong');
 
         switch (statusCode) {
           case 400:

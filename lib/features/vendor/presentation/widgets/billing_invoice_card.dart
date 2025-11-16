@@ -31,12 +31,12 @@ class BillingInvoiceCard extends StatelessWidget {
         color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.grey.withOpacity(0.3),
+          color: AppColors.grey.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -238,3 +238,4 @@ class BillingInvoiceCard extends StatelessWidget {
     );
   }
 }
+

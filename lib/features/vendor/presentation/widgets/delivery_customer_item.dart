@@ -221,7 +221,7 @@ class _DeliveryCustomerItemState extends State<DeliveryCustomerItem> {
                               filled: true,
                               fillColor: Theme.of(context).brightness == Brightness.dark 
                                   ? AppColors.surfaceDark 
-                                  : Colors.white.withOpacity(0.8),
+                                  : Colors.white.withValues(alpha: 0.8),
                             ),
                             style: AppTextStyles.titleMedium.copyWith(
                               fontWeight: FontWeight.bold,
@@ -300,3 +300,4 @@ class _DeliveryCustomerItemState extends State<DeliveryCustomerItem> {
     widget.onQuantityChange(newQuantity);
   }
 }
+

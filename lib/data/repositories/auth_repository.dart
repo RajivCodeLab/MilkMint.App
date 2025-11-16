@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../models/user_role.dart';
 import '../../core/auth/auth_service.dart';
+import '../../core/auth/firebase_service.dart';
 import '../data_sources/local/auth_local_ds.dart';
 import '../data_sources/remote/auth_remote_ds.dart';
 
@@ -19,6 +20,19 @@ abstract class AuthRepository {
 
   /// Login with Firebase credentials and get user role from backend
   Future<User> loginWithFirebase(firebase_auth.UserCredential credential);
+
+  /// Get if last login was a new user (for onboarding flow)
+  bool wasNewUser();
+
+  /// Complete user profile (onboarding)
+  Future<User> completeOnboarding({
+    required String firstName,
+    required String lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
+  });
 
   /// Get current user from local storage
   User? getCurrentUser();
@@ -41,6 +55,8 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthService _authService;
   final AuthLocalDataSource _localDataSource;
   final AuthRemoteDataSource _remoteDataSource;
+  
+  bool _isNewUser = false;
 
   AuthRepositoryImpl(
     this._authService,
@@ -92,42 +108,37 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> loginWithFirebase(
     firebase_auth.UserCredential credential,
   ) async {
-    try {
-      // Get Firebase ID token
-      final idToken = await credential.user?.getIdToken();
-      if (idToken == null) {
-        throw Exception('Failed to get Firebase ID token');
-      }
-
-      // Call backend to validate token and get user role
-      final loginResponse = await _remoteDataSource.login(idToken);
-
-      // Save user and token locally
-      await _localDataSource.saveUser(loginResponse.user);
-      await _localDataSource.saveToken(loginResponse.token);
-
-      return loginResponse.user;
-    } catch (e) {
-      // If backend call fails, create default vendor user from Firebase data
-      final firebaseUser = credential.user!;
-      final defaultUser = User(
-        uid: firebaseUser.uid,
-        phone: firebaseUser.phoneNumber ?? '',
-        role: UserRole.vendor, // Default role
-        language: 'en',
-        fcmTokens: [],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      // Save locally
-      await _localDataSource.saveUser(defaultUser);
-      // Save Firebase ID token as auth token
-      final token = await firebaseUser.getIdToken() ?? '';
-      await _localDataSource.saveToken(token);
-
-      return defaultUser;
+    // Get Firebase ID token
+    final idToken = await credential.user?.getIdToken();
+    if (idToken == null) {
+      throw Exception('Failed to get Firebase ID token');
     }
+
+    // Get phone number from Firebase user
+    final phone = credential.user?.phoneNumber;
+    if (phone == null) {
+      throw Exception('Phone number not available from Firebase');
+    }
+
+    // Get FCM token for push notifications
+    final fcmToken = await FirebaseService.getFCMToken();
+
+    // Call backend to validate token and get user role
+    final loginResponse = await _remoteDataSource.login(
+      idToken,
+      phone,
+      fcmToken: fcmToken,
+      language: 'en',
+    );
+    
+    // Store new user flag for onboarding check
+    _isNewUser = loginResponse.isNewUser;
+
+    // Save user and token locally
+    await _localDataSource.saveUser(loginResponse.user);
+    await _localDataSource.saveToken(loginResponse.token);
+
+    return loginResponse.user;
   }
 
   @override
@@ -156,7 +167,7 @@ class AuthRepositoryImpl implements AuthRepository {
     final user = getCurrentUser();
     if (user != null) {
       try {
-        await _remoteDataSource.updateFcmToken(user.uid, token);
+        await _remoteDataSource.addFcmToken(token);
         
         // Update local user with new FCM token
         final updatedTokens = [...user.fcmTokens];
@@ -171,5 +182,42 @@ class AuthRepositoryImpl implements AuthRepository {
         // Token will be updated on next successful API call
       }
     }
+  }
+  
+  @override
+  bool wasNewUser() {
+    return _isNewUser;
+  }
+  
+  @override
+  Future<User> completeOnboarding({
+    required String firstName,
+    required String lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
+  }) async {
+    final token = await _authService.getIdToken();
+    if (token == null) throw Exception('Not authenticated');
+    
+    // Call backend onboarding endpoint
+    final response = await _remoteDataSource.completeOnboarding(
+      token: token,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      address: address,
+      city: city,
+      pincode: pincode,
+    );
+    
+    // Save updated user to local storage
+    await _localDataSource.saveUser(response.user);
+    await _localDataSource.saveToken(token);
+    
+    _isNewUser = false;
+    
+    return response.user;
   }
 }

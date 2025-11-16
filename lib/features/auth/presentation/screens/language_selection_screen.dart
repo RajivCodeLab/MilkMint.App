@@ -32,7 +32,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
 
               // App Name
               Text(
-                'MilkBill',
+                'MilkMint',
                 style: AppTextStyles.displayLarge,
                 textAlign: TextAlign.center,
               ),

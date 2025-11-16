@@ -26,6 +26,7 @@ mixin _$AuthState {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -37,6 +38,7 @@ mixin _$AuthState {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -48,6 +50,7 @@ mixin _$AuthState {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -60,6 +63,7 @@ mixin _$AuthState {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -71,6 +75,7 @@ mixin _$AuthState {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -82,6 +87,7 @@ mixin _$AuthState {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -157,6 +163,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -172,6 +179,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -187,6 +195,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -206,6 +215,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return initial(this);
@@ -221,6 +231,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return initial?.call(this);
@@ -236,6 +247,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -300,6 +312,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return unauthenticated();
@@ -315,6 +328,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return unauthenticated?.call();
@@ -330,6 +344,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -349,6 +364,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return unauthenticated(this);
@@ -364,6 +380,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return unauthenticated?.call(this);
@@ -379,6 +396,7 @@ class _$UnauthenticatedImpl implements _Unauthenticated {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -443,6 +461,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return sendingOtp();
@@ -458,6 +477,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return sendingOtp?.call();
@@ -473,6 +493,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -492,6 +513,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return sendingOtp(this);
@@ -507,6 +529,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return sendingOtp?.call(this);
@@ -522,6 +545,7 @@ class _$SendingOtpImpl implements _SendingOtp {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -614,6 +638,7 @@ class _$OtpSentImpl implements _OtpSent {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return otpSent(verificationId);
@@ -629,6 +654,7 @@ class _$OtpSentImpl implements _OtpSent {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return otpSent?.call(verificationId);
@@ -644,6 +670,7 @@ class _$OtpSentImpl implements _OtpSent {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -663,6 +690,7 @@ class _$OtpSentImpl implements _OtpSent {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return otpSent(this);
@@ -678,6 +706,7 @@ class _$OtpSentImpl implements _OtpSent {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return otpSent?.call(this);
@@ -693,6 +722,7 @@ class _$OtpSentImpl implements _OtpSent {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -765,6 +795,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return verifyingOtp();
@@ -780,6 +811,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return verifyingOtp?.call();
@@ -795,6 +827,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -814,6 +847,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return verifyingOtp(this);
@@ -829,6 +863,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return verifyingOtp?.call(this);
@@ -844,6 +879,7 @@ class _$VerifyingOtpImpl implements _VerifyingOtp {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -908,6 +944,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return authenticating();
@@ -923,6 +960,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return authenticating?.call();
@@ -938,6 +976,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -957,6 +996,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return authenticating(this);
@@ -972,6 +1012,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return authenticating?.call(this);
@@ -987,6 +1028,7 @@ class _$AuthenticatingImpl implements _Authenticating {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -1090,6 +1132,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return authenticated(user);
@@ -1105,6 +1148,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return authenticated?.call(user);
@@ -1120,6 +1164,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -1139,6 +1184,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return authenticated(this);
@@ -1154,6 +1200,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return authenticated?.call(this);
@@ -1169,6 +1216,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -1188,6 +1236,205 @@ abstract class _Authenticated implements AuthState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AuthenticatedImplCopyWith<_$AuthenticatedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$RequiresOnboardingImplCopyWith<$Res> {
+  factory _$$RequiresOnboardingImplCopyWith(
+    _$RequiresOnboardingImpl value,
+    $Res Function(_$RequiresOnboardingImpl) then,
+  ) = __$$RequiresOnboardingImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({User user});
+
+  $UserCopyWith<$Res> get user;
+}
+
+/// @nodoc
+class __$$RequiresOnboardingImplCopyWithImpl<$Res>
+    extends _$AuthStateCopyWithImpl<$Res, _$RequiresOnboardingImpl>
+    implements _$$RequiresOnboardingImplCopyWith<$Res> {
+  __$$RequiresOnboardingImplCopyWithImpl(
+    _$RequiresOnboardingImpl _value,
+    $Res Function(_$RequiresOnboardingImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? user = null}) {
+    return _then(
+      _$RequiresOnboardingImpl(
+        null == user
+            ? _value.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as User,
+      ),
+    );
+  }
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UserCopyWith<$Res> get user {
+    return $UserCopyWith<$Res>(_value.user, (value) {
+      return _then(_value.copyWith(user: value));
+    });
+  }
+}
+
+/// @nodoc
+
+class _$RequiresOnboardingImpl implements _RequiresOnboarding {
+  const _$RequiresOnboardingImpl(this.user);
+
+  @override
+  final User user;
+
+  @override
+  String toString() {
+    return 'AuthState.requiresOnboarding(user: $user)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RequiresOnboardingImpl &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, user);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RequiresOnboardingImplCopyWith<_$RequiresOnboardingImpl> get copyWith =>
+      __$$RequiresOnboardingImplCopyWithImpl<_$RequiresOnboardingImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() unauthenticated,
+    required TResult Function() sendingOtp,
+    required TResult Function(String verificationId) otpSent,
+    required TResult Function() verifyingOtp,
+    required TResult Function() authenticating,
+    required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
+    required TResult Function(String message) error,
+  }) {
+    return requiresOnboarding(user);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? unauthenticated,
+    TResult? Function()? sendingOtp,
+    TResult? Function(String verificationId)? otpSent,
+    TResult? Function()? verifyingOtp,
+    TResult? Function()? authenticating,
+    TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
+    TResult? Function(String message)? error,
+  }) {
+    return requiresOnboarding?.call(user);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? unauthenticated,
+    TResult Function()? sendingOtp,
+    TResult Function(String verificationId)? otpSent,
+    TResult Function()? verifyingOtp,
+    TResult Function()? authenticating,
+    TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (requiresOnboarding != null) {
+      return requiresOnboarding(user);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Unauthenticated value) unauthenticated,
+    required TResult Function(_SendingOtp value) sendingOtp,
+    required TResult Function(_OtpSent value) otpSent,
+    required TResult Function(_VerifyingOtp value) verifyingOtp,
+    required TResult Function(_Authenticating value) authenticating,
+    required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
+    required TResult Function(_Error value) error,
+  }) {
+    return requiresOnboarding(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Unauthenticated value)? unauthenticated,
+    TResult? Function(_SendingOtp value)? sendingOtp,
+    TResult? Function(_OtpSent value)? otpSent,
+    TResult? Function(_VerifyingOtp value)? verifyingOtp,
+    TResult? Function(_Authenticating value)? authenticating,
+    TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
+    TResult? Function(_Error value)? error,
+  }) {
+    return requiresOnboarding?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Unauthenticated value)? unauthenticated,
+    TResult Function(_SendingOtp value)? sendingOtp,
+    TResult Function(_OtpSent value)? otpSent,
+    TResult Function(_VerifyingOtp value)? verifyingOtp,
+    TResult Function(_Authenticating value)? authenticating,
+    TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
+    TResult Function(_Error value)? error,
+    required TResult orElse(),
+  }) {
+    if (requiresOnboarding != null) {
+      return requiresOnboarding(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _RequiresOnboarding implements AuthState {
+  const factory _RequiresOnboarding(final User user) = _$RequiresOnboardingImpl;
+
+  User get user;
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RequiresOnboardingImplCopyWith<_$RequiresOnboardingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -1268,6 +1515,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function() verifyingOtp,
     required TResult Function() authenticating,
     required TResult Function(User user) authenticated,
+    required TResult Function(User user) requiresOnboarding,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -1283,6 +1531,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? verifyingOtp,
     TResult? Function()? authenticating,
     TResult? Function(User user)? authenticated,
+    TResult? Function(User user)? requiresOnboarding,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -1298,6 +1547,7 @@ class _$ErrorImpl implements _Error {
     TResult Function()? verifyingOtp,
     TResult Function()? authenticating,
     TResult Function(User user)? authenticated,
+    TResult Function(User user)? requiresOnboarding,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -1317,6 +1567,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function(_VerifyingOtp value) verifyingOtp,
     required TResult Function(_Authenticating value) authenticating,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_RequiresOnboarding value) requiresOnboarding,
     required TResult Function(_Error value) error,
   }) {
     return error(this);
@@ -1332,6 +1583,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function(_VerifyingOtp value)? verifyingOtp,
     TResult? Function(_Authenticating value)? authenticating,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult? Function(_Error value)? error,
   }) {
     return error?.call(this);
@@ -1347,6 +1599,7 @@ class _$ErrorImpl implements _Error {
     TResult Function(_VerifyingOtp value)? verifyingOtp,
     TResult Function(_Authenticating value)? authenticating,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_RequiresOnboarding value)? requiresOnboarding,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {

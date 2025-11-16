@@ -290,10 +290,10 @@ class _ColorTile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+            '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
             style: TextStyle(
               fontSize: 10,
-              color: _getContrastColor(color).withOpacity(0.8),
+              color: _getContrastColor(color).withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -303,7 +303,7 @@ class _ColorTile extends StatelessWidget {
 
   Color _getContrastColor(Color color) {
     // Calculate luminance
-    final luminance = (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255;
+    final luminance = (0.299 * (color.r * 255.0).round() + 0.587 * (color.g * 255.0).round() + 0.114 * (color.b * 255.0).round()) / 255;
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 }

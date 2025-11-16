@@ -59,6 +59,12 @@ class User with _$User {
     required String phone,
     required UserRole role,
     String? vendorId, // Reference to vendor if customer/delivery_agent
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
     @Default('en') String language,
     @Default([]) List<String> fcmTokens,
     DateTime? createdAt,

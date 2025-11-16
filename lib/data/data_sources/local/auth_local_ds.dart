@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/foundation.dart';
 import '../../../models/user_role.dart';
 
 /// Local data source for user authentication data
@@ -22,12 +23,20 @@ class AuthLocalDataSource {
 
   /// Get current user from local storage
   User? getUser() {
-    if (_userBox == null || !_userBox!.isOpen) return null;
-    
-    final userJson = _userBox!.get(_userKey) as Map<dynamic, dynamic>?;
-    if (userJson == null) return null;
+    try {
+      if (_userBox == null || !_userBox!.isOpen) {
+        // Try to open box synchronously if not already open
+        _userBox = Hive.box(_userBoxName);
+      }
+      
+      final userJson = _userBox!.get(_userKey) as Map<dynamic, dynamic>?;
+      if (userJson == null) return null;
 
-    return User.fromJson(Map<String, dynamic>.from(userJson));
+      return User.fromJson(Map<String, dynamic>.from(userJson));
+    } catch (e) {
+      debugPrint('Error getting user: $e');
+      return null;
+    }
   }
 
   /// Save authentication token
@@ -38,8 +47,16 @@ class AuthLocalDataSource {
 
   /// Get authentication token
   String? getToken() {
-    if (_userBox == null || !_userBox!.isOpen) return null;
-    return _userBox!.get(_tokenKey) as String?;
+    try {
+      if (_userBox == null || !_userBox!.isOpen) {
+        // Try to open box synchronously if not already open
+        _userBox = Hive.box(_userBoxName);
+      }
+      return _userBox!.get(_tokenKey) as String?;
+    } catch (e) {
+      debugPrint('Error getting token: $e');
+      return null;
+    }
   }
 
   /// Clear all authentication data

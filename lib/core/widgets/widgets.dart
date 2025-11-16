@@ -1,9 +1,7 @@
-/// MilkBill reusable widgets
-/// 
-/// This library exports all custom widgets for the MilkBill app.
-/// Import this file to access all widgets in one go.
-
-library milk_bill_widgets;
+// MilkBill reusable widgets
+// 
+// This library exports all custom widgets for the MilkBill app.
+// Import this file to access all widgets in one go.
 
 // Buttons
 export 'app_button.dart';

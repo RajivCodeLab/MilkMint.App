@@ -326,4 +326,4 @@ syncStatus = SyncStatus(syncedCount: 1, lastSyncTime: now);
 
 **Last Updated:** November 16, 2025  
 **Version:** 1.0.0  
-**Author:** MilkBill Development Team
+**Author:** MilkMint Development Team

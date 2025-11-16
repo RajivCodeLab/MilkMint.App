@@ -80,7 +80,7 @@ class PhoneInputField extends StatelessWidget {
             ),
             filled: true,
             fillColor: enabled 
-                ? (isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8))
+                ? (isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8))
                 : AppColors.border.withValues(alpha: 0.1),
           ),
           style: AppTextStyles.bodyLarge,
@@ -102,3 +102,4 @@ class PhoneInputField extends StatelessWidget {
     );
   }
 }
+

@@ -130,7 +130,7 @@ class _OtpInputFieldState extends State<OtpInputField> {
                   ),
                   filled: true,
                   fillColor: widget.enabled
-                      ? (isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8))
+                      ? (isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8))
                       : AppColors.border.withValues(alpha: 0.1),
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -156,3 +156,4 @@ class _OtpInputFieldState extends State<OtpInputField> {
     );
   }
 }
+

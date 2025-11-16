@@ -133,7 +133,7 @@ class AppCard extends StatelessWidget {
     final shadowElevation = elevation ?? 1;
     return [
       BoxShadow(
-        color: AppColors.primary.withOpacity(0.08),
+        color: AppColors.primary.withValues(alpha: 0.08),
         blurRadius: 8 * shadowElevation,
         offset: Offset(0, 4 * shadowElevation),
       ),
@@ -170,7 +170,7 @@ class AppInfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+              color: (iconColor ?? AppColors.primary).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -246,7 +246,7 @@ class AppStatsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+                color: (iconColor ?? AppColors.primary).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -313,7 +313,7 @@ class AppEmptyCard extends StatelessWidget {
           Icon(
             icon,
             size: 64,
-            color: AppColors.textSecondary.withOpacity(0.5),
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -336,3 +336,4 @@ class AppEmptyCard extends StatelessWidget {
     );
   }
 }
+

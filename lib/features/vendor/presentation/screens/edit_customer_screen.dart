@@ -97,7 +97,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8),
+                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
               ),
               textCapitalization: TextCapitalization.words,
               validator: (value) {
@@ -124,7 +124,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: AppColors.surface,
+                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
               ),
               keyboardType: TextInputType.phone,
               inputFormatters: [
@@ -157,7 +157,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8),
+                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
               ),
               maxLines: 2,
               textCapitalization: TextCapitalization.words,
@@ -185,7 +185,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
@@ -218,7 +218,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
@@ -244,7 +244,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
@@ -270,7 +270,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                             _selectedFrequency = frequency;
                           });
                         },
-                        backgroundColor: AppColors.surface,
+                        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.6),
                         selectedColor: AppColors.primary.withValues(alpha: 0.2),
                         side: BorderSide(
                           color: isSelected ? AppColors.primary : AppColors.border,
@@ -300,7 +300,7 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                   _isActive = value;
                 });
               },
-              tileColor: AppColors.surface,
+              tileColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: const BorderSide(color: AppColors.border),
@@ -460,3 +460,4 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
     }
   }
 }
+

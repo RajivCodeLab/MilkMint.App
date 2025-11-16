@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/language_selection_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../../features/auth/presentation/screens/role_resolution_screen.dart';
+import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/vendor/presentation/screens/vendor_dashboard_screen.dart';
 import '../../features/vendor/presentation/screens/customer_list_screen.dart';
 import '../../features/vendor/presentation/screens/add_customer_screen.dart';
@@ -11,6 +13,10 @@ import '../../features/vendor/presentation/screens/edit_customer_screen.dart';
 import '../../features/vendor/presentation/screens/delivery_log_screen.dart';
 import '../../features/vendor/presentation/screens/billing_screen.dart';
 import '../../features/vendor/presentation/screens/payments_screen.dart';
+import '../../features/vendor/presentation/screens/reports_screen.dart';
+import '../../features/vendor/presentation/screens/settings_screen.dart';
+import '../../features/vendor/presentation/screens/edit_profile_screen.dart';
+import '../../features/common/presentation/screens/notifications_screen.dart';
 import '../../features/customer/presentation/screens/customer_home_screen.dart';
 import '../../features/customer/presentation/screens/holiday_request_screen.dart';
 import '../../features/customer/presentation/screens/delivery_history_screen.dart';
@@ -18,10 +24,12 @@ import '../../features/auth/application/auth_provider.dart';
 
 /// Route configuration for the app
 class AppRoutes {
-  static const String languageSelection = '/';
+  static const String splash = '/';
+  static const String languageSelection = '/language-selection';
   static const String login = '/login';
   static const String otpVerification = '/otp-verification';
   static const String roleResolution = '/role-resolution';
+  static const String onboarding = '/onboarding';
   static const String vendorHome = '/vendor-home';
   static const String customerHome = '/customer-home';
   static const String deliveryHome = '/delivery-home';
@@ -31,11 +39,20 @@ class AppRoutes {
   static const String deliveryLog = '/delivery-log';
   static const String billing = '/billing';
   static const String payments = '/payments';
+  static const String reports = '/reports';
+  static const String settings = '/settings';
+  static const String editProfile = '/edit-profile';
+  static const String notifications = '/notifications';
   static const String holidayRequest = '/holiday-request';
   static const String deliveryHistory = '/delivery-history';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case splash:
+        return MaterialPageRoute(
+          builder: (_) => const SplashScreen(),
+        );
+
       case languageSelection:
         return MaterialPageRoute(
           builder: (_) => const LanguageSelectionScreen(),
@@ -60,6 +77,11 @@ class AppRoutes {
           builder: (_) => const RoleResolutionScreen(),
         );
 
+      case onboarding:
+        return MaterialPageRoute(
+          builder: (_) => const OnboardingScreen(),
+        );
+
       case vendorHome:
         return MaterialPageRoute(
           builder: (_) => const VendorDashboardScreen(),
@@ -78,6 +100,7 @@ class AppRoutes {
       case editCustomer:
         return MaterialPageRoute(
           builder: (_) => const EditCustomerScreen(),
+          settings: settings,
         );
 
       case deliveryLog:
@@ -93,6 +116,26 @@ class AppRoutes {
       case payments:
         return MaterialPageRoute(
           builder: (_) => const PaymentsScreen(),
+        );
+
+      case reports:
+        return MaterialPageRoute(
+          builder: (_) => const ReportsScreen(),
+        );
+
+      case AppRoutes.settings:
+        return MaterialPageRoute(
+          builder: (_) => const SettingsScreen(),
+        );
+
+      case editProfile:
+        return MaterialPageRoute(
+          builder: (_) => const EditProfileScreen(),
+        );
+
+      case notifications:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationsScreen(),
         );
 
       case customerHome:

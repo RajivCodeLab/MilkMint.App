@@ -22,7 +22,6 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Customer {
   @JsonKey(name: '_id')
-  String? get id => throw _privateConstructorUsedError;
   String get customerId => throw _privateConstructorUsedError;
   String get vendorId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
@@ -52,8 +51,7 @@ abstract class $CustomerCopyWith<$Res> {
       _$CustomerCopyWithImpl<$Res, Customer>;
   @useResult
   $Res call({
-    @JsonKey(name: '_id') String? id,
-    String customerId,
+    @JsonKey(name: '_id') String customerId,
     String vendorId,
     String name,
     String phone,
@@ -82,7 +80,6 @@ class _$CustomerCopyWithImpl<$Res, $Val extends Customer>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
     Object? customerId = null,
     Object? vendorId = null,
     Object? name = null,
@@ -97,10 +94,6 @@ class _$CustomerCopyWithImpl<$Res, $Val extends Customer>
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String?,
             customerId: null == customerId
                 ? _value.customerId
                 : customerId // ignore: cast_nullable_to_non_nullable
@@ -161,8 +154,7 @@ abstract class _$$CustomerImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(name: '_id') String? id,
-    String customerId,
+    @JsonKey(name: '_id') String customerId,
     String vendorId,
     String name,
     String phone,
@@ -190,7 +182,6 @@ class __$$CustomerImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
     Object? customerId = null,
     Object? vendorId = null,
     Object? name = null,
@@ -205,10 +196,6 @@ class __$$CustomerImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$CustomerImpl(
-        id: freezed == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
         customerId: null == customerId
             ? _value.customerId
             : customerId // ignore: cast_nullable_to_non_nullable
@@ -262,8 +249,7 @@ class __$$CustomerImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CustomerImpl implements _Customer {
   const _$CustomerImpl({
-    @JsonKey(name: '_id') this.id,
-    required this.customerId,
+    @JsonKey(name: '_id') required this.customerId,
     required this.vendorId,
     required this.name,
     required this.phone,
@@ -281,8 +267,6 @@ class _$CustomerImpl implements _Customer {
 
   @override
   @JsonKey(name: '_id')
-  final String? id;
-  @override
   final String customerId;
   @override
   final String vendorId;
@@ -313,7 +297,7 @@ class _$CustomerImpl implements _Customer {
 
   @override
   String toString() {
-    return 'Customer(id: $id, customerId: $customerId, vendorId: $vendorId, name: $name, phone: $phone, address: $address, quantity: $quantity, rate: $rate, frequency: $frequency, active: $active, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Customer(customerId: $customerId, vendorId: $vendorId, name: $name, phone: $phone, address: $address, quantity: $quantity, rate: $rate, frequency: $frequency, active: $active, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -321,7 +305,6 @@ class _$CustomerImpl implements _Customer {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CustomerImpl &&
-            (identical(other.id, id) || other.id == id) &&
             (identical(other.customerId, customerId) ||
                 other.customerId == customerId) &&
             (identical(other.vendorId, vendorId) ||
@@ -345,7 +328,6 @@ class _$CustomerImpl implements _Customer {
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    id,
     customerId,
     vendorId,
     name,
@@ -375,8 +357,7 @@ class _$CustomerImpl implements _Customer {
 
 abstract class _Customer implements Customer {
   const factory _Customer({
-    @JsonKey(name: '_id') final String? id,
-    required final String customerId,
+    @JsonKey(name: '_id') required final String customerId,
     required final String vendorId,
     required final String name,
     required final String phone,
@@ -394,8 +375,6 @@ abstract class _Customer implements Customer {
 
   @override
   @JsonKey(name: '_id')
-  String? get id;
-  @override
   String get customerId;
   @override
   String get vendorId;

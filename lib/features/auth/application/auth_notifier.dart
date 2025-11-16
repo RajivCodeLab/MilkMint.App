@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../models/user_role.dart';
@@ -23,14 +24,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _checkAuthStatus() async {
     await Future.delayed(const Duration(milliseconds: 500)); // Splash delay
 
-    if (_repository.isLoggedIn()) {
+    debugPrint('🔍 Checking auth status...');
+    final isLoggedIn = _repository.isLoggedIn();
+    debugPrint('🔍 Is logged in: $isLoggedIn');
+    
+    if (isLoggedIn) {
       final user = _repository.getCurrentUser();
+      debugPrint('🔍 Current user: ${user?.phone}, role: ${user?.role.name}');
       if (user != null) {
         state = AuthState.authenticated(user);
+        debugPrint('✅ User authenticated, navigating to home');
         return;
       }
     }
 
+    debugPrint('❌ User not authenticated, showing language selection');
     state = const AuthState.unauthenticated();
   }
 
@@ -69,8 +77,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Subscribe to notification topics based on user role
       await _subscribeToNotificationTopics(user);
 
-      state = AuthState.authenticated(user);
+      // Check if this is a new user who needs onboarding
+      if (_repository.wasNewUser()) {
+        state = AuthState.requiresOnboarding(user);
+      } else {
+        state = AuthState.authenticated(user);
+      }
     } on firebase_auth.FirebaseAuthException catch (e) {
+      debugPrint('🔴 Firebase Auth Error: ${e.code} - ${e.message}');
       String message;
       switch (e.code) {
         case 'invalid-verification-code':
@@ -84,6 +98,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
       state = AuthState.error(message);
     } catch (e) {
+      debugPrint('🔴 Login Error: $e');
       state = AuthState.error('Login failed: ${e.toString()}');
     }
   }
@@ -118,6 +133,50 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Reset to unauthenticated state (for navigation)
   void resetToUnauthenticated() {
     state = const AuthState.unauthenticated();
+  }
+
+  /// Complete onboarding and transition to authenticated state
+  void completeOnboarding() {
+    final currentState = state;
+    currentState.maybeWhen(
+      requiresOnboarding: (user) {
+        state = AuthState.authenticated(user);
+      },
+      orElse: () {
+        // Already authenticated or invalid state
+      },
+    );
+  }
+
+  /// Submit onboarding details to backend
+  Future<void> submitOnboarding({
+    required String firstName,
+    required String lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
+  }) async {
+    try {
+      state = const AuthState.authenticating();
+
+      final user = await _repository.completeOnboarding(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        address: address,
+        city: city,
+        pincode: pincode,
+      );
+
+      // Subscribe to notification topics based on user role
+      await _subscribeToNotificationTopics(user);
+
+      state = AuthState.authenticated(user);
+    } catch (e) {
+      debugPrint('🔴 Onboarding Error: $e');
+      state = AuthState.error('Failed to complete onboarding: ${e.toString()}');
+    }
   }
 
   /// Subscribe to notification topics based on user role

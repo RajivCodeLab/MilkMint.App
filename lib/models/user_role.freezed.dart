@@ -28,6 +28,12 @@ mixin _$User {
   UserRole get role => throw _privateConstructorUsedError;
   String? get vendorId =>
       throw _privateConstructorUsedError; // Reference to vendor if customer/delivery_agent
+  String? get firstName => throw _privateConstructorUsedError;
+  String? get lastName => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+  String? get address => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get pincode => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
   List<String> get fcmTokens => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -53,6 +59,12 @@ abstract class $UserCopyWith<$Res> {
     String phone,
     UserRole role,
     String? vendorId,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
     String language,
     List<String> fcmTokens,
     DateTime? createdAt,
@@ -80,6 +92,12 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? phone = null,
     Object? role = null,
     Object? vendorId = freezed,
+    Object? firstName = freezed,
+    Object? lastName = freezed,
+    Object? email = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? pincode = freezed,
     Object? language = null,
     Object? fcmTokens = null,
     Object? createdAt = freezed,
@@ -106,6 +124,30 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
             vendorId: freezed == vendorId
                 ? _value.vendorId
                 : vendorId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            firstName: freezed == firstName
+                ? _value.firstName
+                : firstName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            lastName: freezed == lastName
+                ? _value.lastName
+                : lastName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            address: freezed == address
+                ? _value.address
+                : address // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            city: freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            pincode: freezed == pincode
+                ? _value.pincode
+                : pincode // ignore: cast_nullable_to_non_nullable
                       as String?,
             language: null == language
                 ? _value.language
@@ -143,6 +185,12 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     String phone,
     UserRole role,
     String? vendorId,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
     String language,
     List<String> fcmTokens,
     DateTime? createdAt,
@@ -167,6 +215,12 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? phone = null,
     Object? role = null,
     Object? vendorId = freezed,
+    Object? firstName = freezed,
+    Object? lastName = freezed,
+    Object? email = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? pincode = freezed,
     Object? language = null,
     Object? fcmTokens = null,
     Object? createdAt = freezed,
@@ -193,6 +247,30 @@ class __$$UserImplCopyWithImpl<$Res>
         vendorId: freezed == vendorId
             ? _value.vendorId
             : vendorId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        firstName: freezed == firstName
+            ? _value.firstName
+            : firstName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        lastName: freezed == lastName
+            ? _value.lastName
+            : lastName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        address: freezed == address
+            ? _value.address
+            : address // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        city: freezed == city
+            ? _value.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        pincode: freezed == pincode
+            ? _value.pincode
+            : pincode // ignore: cast_nullable_to_non_nullable
                   as String?,
         language: null == language
             ? _value.language
@@ -224,6 +302,12 @@ class _$UserImpl implements _User {
     required this.phone,
     required this.role,
     this.vendorId,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.address,
+    this.city,
+    this.pincode,
     this.language = 'en',
     final List<String> fcmTokens = const [],
     this.createdAt,
@@ -247,6 +331,18 @@ class _$UserImpl implements _User {
   final String? vendorId;
   // Reference to vendor if customer/delivery_agent
   @override
+  final String? firstName;
+  @override
+  final String? lastName;
+  @override
+  final String? email;
+  @override
+  final String? address;
+  @override
+  final String? city;
+  @override
+  final String? pincode;
+  @override
   @JsonKey()
   final String language;
   final List<String> _fcmTokens;
@@ -265,7 +361,7 @@ class _$UserImpl implements _User {
 
   @override
   String toString() {
-    return 'User(id: $id, uid: $uid, phone: $phone, role: $role, vendorId: $vendorId, language: $language, fcmTokens: $fcmTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, uid: $uid, phone: $phone, role: $role, vendorId: $vendorId, firstName: $firstName, lastName: $lastName, email: $email, address: $address, city: $city, pincode: $pincode, language: $language, fcmTokens: $fcmTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -279,6 +375,14 @@ class _$UserImpl implements _User {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.vendorId, vendorId) ||
                 other.vendorId == vendorId) &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
+            (identical(other.lastName, lastName) ||
+                other.lastName == lastName) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.address, address) || other.address == address) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.pincode, pincode) || other.pincode == pincode) &&
             (identical(other.language, language) ||
                 other.language == language) &&
             const DeepCollectionEquality().equals(
@@ -300,6 +404,12 @@ class _$UserImpl implements _User {
     phone,
     role,
     vendorId,
+    firstName,
+    lastName,
+    email,
+    address,
+    city,
+    pincode,
     language,
     const DeepCollectionEquality().hash(_fcmTokens),
     createdAt,
@@ -327,6 +437,12 @@ abstract class _User implements User {
     required final String phone,
     required final UserRole role,
     final String? vendorId,
+    final String? firstName,
+    final String? lastName,
+    final String? email,
+    final String? address,
+    final String? city,
+    final String? pincode,
     final String language,
     final List<String> fcmTokens,
     final DateTime? createdAt,
@@ -346,6 +462,18 @@ abstract class _User implements User {
   UserRole get role;
   @override
   String? get vendorId; // Reference to vendor if customer/delivery_agent
+  @override
+  String? get firstName;
+  @override
+  String? get lastName;
+  @override
+  String? get email;
+  @override
+  String? get address;
+  @override
+  String? get city;
+  @override
+  String? get pincode;
   @override
   String get language;
   @override

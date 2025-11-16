@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/payment/payment.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Payment state
 class PaymentState {
@@ -72,22 +73,18 @@ class PaymentState {
 
 /// Payment notifier
 class PaymentNotifier extends StateNotifier<PaymentState> {
-  PaymentNotifier() : super(PaymentState());
+  final Ref _ref;
+
+  PaymentNotifier(this._ref) : super(PaymentState());
 
   /// Load payments
   Future<void> loadPayments() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // TODO: Replace with actual API call
-      // final response = await apiClient.get('/payments?vendorId=...');
-      // final payments = (response.data as List)
-      //     .map((json) => Payment.fromJson(json))
-      //     .toList();
-
-      // Mock data for development
-      await Future.delayed(const Duration(seconds: 1));
-      final payments = _generateMockPayments();
+      final remoteDs = _ref.read(paymentRemoteDataSourceProvider);
+      
+      final payments = await remoteDs.getPayments();
 
       state = state.copyWith(
         payments: payments,
@@ -113,41 +110,22 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
     state = state.copyWith(isRecording: true, error: null);
 
     try {
-      // TODO: Replace with actual API call
-      // final response = await apiClient.post('/payments', data: {
-      //   'customerId': customerId,
-      //   'amount': amount,
-      //   'mode': mode,
-      //   'invoiceId': invoiceId,
-      //   'transactionId': transactionId,
-      //   'notes': notes,
-      // });
-      // final newPayment = Payment.fromJson(response.data);
-
-      // Mock response
-      await Future.delayed(const Duration(seconds: 1));
-      final newPayment = Payment(
-        id: 'PAY${state.payments.length + 1}',
-        paymentId: 'PAY-${DateTime.now().millisecondsSinceEpoch}',
-        vendorId: 'VENDOR001',
+      final remoteDs = _ref.read(paymentRemoteDataSourceProvider);
+      
+      final newPayment = await remoteDs.recordPayment(
         customerId: customerId,
-        invoiceId: invoiceId,
         amount: amount,
         mode: mode,
+        paymentDate: DateTime.now(),
+        invoiceId: invoiceId,
         transactionId: transactionId,
         notes: notes,
-        timestamp: DateTime.now(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
       state = state.copyWith(
         payments: [newPayment, ...state.payments],
         isRecording: false,
       );
-
-      // TODO: Queue offline action if needed
-      // OfflineQueueManager().queueAction('payment', newPayment.toJson());
     } catch (e) {
       state = state.copyWith(
         isRecording: false,
@@ -160,48 +138,9 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
   void changeFilter(String filter) {
     state = state.copyWith(selectedFilter: filter);
   }
-
-  /// Generate mock payments for development
-  List<Payment> _generateMockPayments() {
-    final now = DateTime.now();
-    final customers = [
-      {'id': 'CUST001', 'name': 'Rajesh Kumar'},
-      {'id': 'CUST002', 'name': 'Priya Sharma'},
-      {'id': 'CUST003', 'name': 'Amit Patel'},
-      {'id': 'CUST004', 'name': 'Sneha Reddy'},
-      {'id': 'CUST005', 'name': 'Vikram Singh'},
-    ];
-
-    final modes = ['cash', 'upi', 'bank_transfer'];
-    final payments = <Payment>[];
-
-    for (int i = 0; i < 15; i++) {
-      final customer = customers[i % customers.length];
-      final mode = modes[i % modes.length];
-      final amount = (500.0 + (i * 150)) % 4000;
-      final daysAgo = i * 2;
-
-      payments.add(Payment(
-        id: 'PAY${i + 1}',
-        paymentId: 'PAY-2025-${(i + 1).toString().padLeft(4, '0')}',
-        vendorId: 'VENDOR001',
-        customerId: customer['id'] as String,
-        invoiceId: i % 3 == 0 ? 'INV-2025-${(i + 1).toString().padLeft(3, '0')}' : null,
-        amount: amount,
-        mode: mode,
-        transactionId: mode != 'cash' ? 'TXN${DateTime.now().millisecondsSinceEpoch + i}' : null,
-        notes: i % 4 == 0 ? 'Monthly payment' : null,
-        timestamp: now.subtract(Duration(days: daysAgo)),
-        createdAt: now.subtract(Duration(days: daysAgo)),
-        updatedAt: now.subtract(Duration(days: daysAgo)),
-      ));
-    }
-
-    return payments..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-  }
 }
 
 /// Payment provider
 final paymentProvider = StateNotifierProvider<PaymentNotifier, PaymentState>(
-  (ref) => PaymentNotifier(),
+  (ref) => PaymentNotifier(ref),
 );

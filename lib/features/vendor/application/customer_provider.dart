@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/customer/customer.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Customer state management
 class CustomerState {
@@ -34,7 +35,7 @@ class CustomerState {
   }
 
   List<Customer> get filteredCustomers {
-    var filtered = customers;
+    List<Customer> filtered = List.from(customers);
 
     // Apply search filter
     if (searchQuery.isNotEmpty) {
@@ -88,19 +89,18 @@ enum CustomerSortOption {
 
 /// Customer notifier for state management
 class CustomerNotifier extends StateNotifier<CustomerState> {
-  CustomerNotifier() : super(CustomerState());
+  CustomerNotifier(this._ref) : super(CustomerState());
+
+  final Ref _ref;
 
   Future<void> loadCustomers() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Mock data for development
-      final mockCustomers = _generateMockCustomers();
+      final remoteDs = _ref.read(customerRemoteDataSourceProvider);
+      final customers = await remoteDs.getCustomers();
       
       state = state.copyWith(
-        customers: mockCustomers,
+        customers: customers,
         isLoading: false,
       );
     } catch (e) {
@@ -113,10 +113,17 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
 
   Future<void> addCustomer(Customer customer) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final remoteDs = _ref.read(customerRemoteDataSourceProvider);
+      final createdCustomer = await remoteDs.createCustomer(
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address,
+        quantity: customer.quantity,
+        rate: customer.rate,
+        frequency: customer.frequency,
+      );
       
-      final updatedCustomers = [...state.customers, customer];
+      final updatedCustomers = [...state.customers, createdCustomer];
       state = state.copyWith(customers: updatedCustomers);
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -126,11 +133,20 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
 
   Future<void> updateCustomer(Customer customer) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final remoteDs = _ref.read(customerRemoteDataSourceProvider);
+      final updatedCustomer = await remoteDs.updateCustomer(
+        customer.customerId,
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address,
+        quantity: customer.quantity,
+        rate: customer.rate,
+        frequency: customer.frequency,
+        active: customer.active,
+      );
       
       final updatedCustomers = state.customers.map((c) {
-        return c.customerId == customer.customerId ? customer : c;
+        return c.customerId == updatedCustomer.customerId ? updatedCustomer : c;
       }).toList();
       
       state = state.copyWith(customers: updatedCustomers);
@@ -142,8 +158,8 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
 
   Future<void> deleteCustomer(String customerId) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final remoteDs = _ref.read(customerRemoteDataSourceProvider);
+      await remoteDs.deleteCustomer(customerId);
       
       final updatedCustomers = state.customers
           .where((c) => c.customerId != customerId)
@@ -181,76 +197,11 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
-
-  List<Customer> _generateMockCustomers() {
-    return [
-      Customer(
-        customerId: '1',
-        vendorId: 'vendor1',
-        name: 'Rajesh Kumar',
-        phone: '+919876543210',
-        address: 'House 101, MG Road, Bangalore',
-        quantity: 2.0,
-        rate: 50.0,
-        frequency: 'daily',
-        active: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      ),
-      Customer(
-        customerId: '2',
-        vendorId: 'vendor1',
-        name: 'Priya Sharma',
-        phone: '+919876543211',
-        address: 'Flat 205, Green Valley, Bangalore',
-        quantity: 1.5,
-        rate: 50.0,
-        frequency: 'daily',
-        active: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 25)),
-      ),
-      Customer(
-        customerId: '3',
-        vendorId: 'vendor1',
-        name: 'Amit Patel',
-        phone: '+919876543212',
-        address: 'Villa 15, Palm Grove, Bangalore',
-        quantity: 3.0,
-        rate: 50.0,
-        frequency: 'daily',
-        active: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 20)),
-      ),
-      Customer(
-        customerId: '4',
-        vendorId: 'vendor1',
-        name: 'Sneha Reddy',
-        phone: '+919876543213',
-        address: 'Apartment 302, Sunrise Towers, Bangalore',
-        quantity: 1.0,
-        rate: 50.0,
-        frequency: 'alternate',
-        active: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 15)),
-      ),
-      Customer(
-        customerId: '5',
-        vendorId: 'vendor1',
-        name: 'Vikram Singh',
-        phone: '+919876543214',
-        address: 'House 45, Lakeside Layout, Bangalore',
-        quantity: 2.5,
-        rate: 50.0,
-        frequency: 'daily',
-        active: false,
-        createdAt: DateTime.now().subtract(const Duration(days: 10)),
-      ),
-    ];
-  }
 }
 
 /// Providers
 final customerProvider = StateNotifierProvider<CustomerNotifier, CustomerState>(
-  (ref) => CustomerNotifier(),
+  (ref) => CustomerNotifier(ref),
 );
 
 final filteredCustomersProvider = Provider<List<Customer>>((ref) {

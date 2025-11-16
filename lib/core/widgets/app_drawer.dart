@@ -59,6 +59,11 @@ class AppDrawer extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, User? user) {
+    final displayName = user != null && user.firstName != null && user.lastName != null
+        ? '${user.firstName} ${user.lastName}'
+        : user?.phone ?? 'Guest';
+    final initials = user?.firstName?.substring(0, 1).toUpperCase() ?? user?.phone.substring(0, 1) ?? 'U';
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -70,7 +75,7 @@ class AppDrawer extends ConsumerWidget {
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -80,7 +85,7 @@ class AppDrawer extends ConsumerWidget {
               radius: 40,
               backgroundColor: Colors.white,
               child: Text(
-                user?.phone.substring(0, 1) ?? 'U',
+                initials,
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -90,16 +95,31 @@ class AppDrawer extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Phone number
+          // User name or phone number
           Text(
-            user?.phone ?? 'Guest',
+            displayName,
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          if (user?.address != null) ...[
+            const SizedBox(height: 4),
+            // Address
+            Text(
+              user!.address!,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 8),
           // Role badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -339,3 +359,4 @@ class _DrawerItem extends StatelessWidget {
     );
   }
 }
+

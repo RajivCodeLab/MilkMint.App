@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
 import '../constants/app_constants.dart';
+import '../models/notification_item.dart';
 
 /// Hive storage service for offline data
 class HiveService {
@@ -20,6 +21,7 @@ class HiveService {
 
       // Register adapters here when models are created
       // Example: Hive.registerAdapter(CustomerAdapter());
+      Hive.registerAdapter(NotificationItemAdapter());
 
       debugPrint('Hive initialized successfully');
       _isInitialized = true;

@@ -12,8 +12,6 @@ import 'core/router/app_routes.dart';
 import 'l10n/localization_service.dart';
 import 'l10n/language_provider.dart';
 import 'data/data_sources/local/auth_local_ds.dart';
-import 'features/auth/application/auth_provider.dart';
-import 'models/user_role.dart' as models;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,7 +88,6 @@ class _MilkBillAppState extends ConsumerState<MilkBillApp> {
   Widget build(BuildContext context) {
     final currentLocale = ref.watch(languageProvider);
     final languageCode = currentLocale.languageCode;
-    final authState = ref.watch(authProvider);
 
     // Listen to notification navigation events
     ref.listen<AsyncValue<NotificationPayload>>(
@@ -105,7 +102,7 @@ class _MilkBillAppState extends ConsumerState<MilkBillApp> {
 
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'MilkBill',
+      title: 'MilkMint',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -123,24 +120,7 @@ class _MilkBillAppState extends ConsumerState<MilkBillApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       onGenerateRoute: AppRoutes.generateRoute,
-      initialRoute: _getInitialRoute(authState),
-    );
-  }
-
-  String _getInitialRoute(authState) {
-    return authState.maybeWhen(
-      authenticated: (user) {
-        // Redirect to appropriate home based on role
-        switch (user.role) {
-          case models.UserRole.vendor:
-            return AppRoutes.vendorHome;
-          case models.UserRole.customer:
-            return AppRoutes.customerHome;
-          case models.UserRole.deliveryAgent:
-            return AppRoutes.deliveryHome;
-        }
-      },
-      orElse: () => AppRoutes.languageSelection,
+      initialRoute: AppRoutes.splash,
     );
   }
 }

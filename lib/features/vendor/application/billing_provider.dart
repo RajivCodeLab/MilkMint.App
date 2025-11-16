@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/invoice/invoice.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Billing state
 class BillingState {
@@ -61,7 +62,9 @@ class BillingState {
 
 /// Billing notifier
 class BillingNotifier extends StateNotifier<BillingState> {
-  BillingNotifier() : super(BillingState());
+  final Ref _ref;
+
+  BillingNotifier(this._ref) : super(BillingState());
 
   /// Load invoices for selected month
   Future<void> loadInvoices({String? month}) async {
@@ -72,15 +75,12 @@ class BillingNotifier extends StateNotifier<BillingState> {
     );
 
     try {
-      // TODO: Replace with actual API call
-      // final response = await apiClient.get('/invoices/${state.selectedMonth}');
-      // final invoices = (response.data as List)
-      //     .map((json) => Invoice.fromJson(json))
-      //     .toList();
-
-      // Mock data for development
-      await Future.delayed(const Duration(seconds: 1));
-      final invoices = _generateMockInvoices(state.selectedMonth);
+      final remoteDs = _ref.read(invoiceRemoteDataSourceProvider);
+      
+      // Get invoices for the selected month
+      final invoices = await remoteDs.getInvoices(
+        month: state.selectedMonth,
+      );
 
       state = state.copyWith(
         invoices: invoices,
@@ -99,14 +99,14 @@ class BillingNotifier extends StateNotifier<BillingState> {
     state = state.copyWith(isGenerating: true, error: null);
 
     try {
-      // TODO: Replace with actual API call
-      // final response = await apiClient.post('/invoices/generate', data: {
-      //   'month': state.selectedMonth,
-      //   if (customerId != null) 'customerId': customerId,
-      // });
-
-      // Mock response
-      await Future.delayed(const Duration(seconds: 2));
+      final remoteDs = _ref.read(invoiceRemoteDataSourceProvider);
+      
+      // Note: API generateInvoices doesn't support customerId filter
+      // It generates for all customers in the month
+      await remoteDs.generateInvoices(
+        month: state.selectedMonth,
+        force: false,
+      );
 
       // Reload invoices after generation
       await loadInvoices(month: state.selectedMonth);
@@ -125,62 +125,31 @@ class BillingNotifier extends StateNotifier<BillingState> {
     loadInvoices(month: month);
   }
 
-  /// Mark invoice as paid (offline action)
-  void markAsPaid(String invoiceId) {
-    final updatedInvoices = state.invoices.map((inv) {
-      if (inv.invoiceId == invoiceId) {
-        return inv.copyWith(paid: true, paidAt: DateTime.now());
-      }
-      return inv;
-    }).toList();
+  /// Mark invoice as paid
+  Future<void> markAsPaid(String invoiceId) async {
+    try {
+      final remoteDs = _ref.read(invoiceRemoteDataSourceProvider);
+      
+      await remoteDs.markInvoiceAsPaid(invoiceId);
+      
+      // Update local state optimistically
+      final updatedInvoices = state.invoices.map((inv) {
+        if (inv.invoiceId == invoiceId) {
+          return inv.copyWith(paid: true, paidAt: DateTime.now());
+        }
+        return inv;
+      }).toList();
 
-    state = state.copyWith(invoices: updatedInvoices);
-
-    // TODO: Queue offline action and sync to backend
-    // OfflineQueueManager().queueAction('invoice_payment', {...});
+      state = state.copyWith(invoices: updatedInvoices);
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to mark invoice as paid: $e');
+      rethrow;
+    }
   }
 
-  /// Generate mock invoices for development
-  List<Invoice> _generateMockInvoices(String month) {
-    final monthDate = DateTime.parse('$month-01');
-    final customers = [
-      {'id': 'CUST001', 'name': 'Rajesh Kumar', 'liters': 60.0, 'rate': 50.0},
-      {'id': 'CUST002', 'name': 'Priya Sharma', 'liters': 45.0, 'rate': 55.0},
-      {'id': 'CUST003', 'name': 'Amit Patel', 'liters': 30.0, 'rate': 50.0},
-      {'id': 'CUST004', 'name': 'Sneha Reddy', 'liters': 75.0, 'rate': 52.0},
-      {'id': 'CUST005', 'name': 'Vikram Singh', 'liters': 50.0, 'rate': 48.0},
-    ];
-
-    return customers.asMap().entries.map((entry) {
-      final index = entry.key;
-      final cust = entry.value;
-      final liters = cust['liters'] as double;
-      final rate = cust['rate'] as double;
-      final amount = liters * rate;
-
-      return Invoice(
-        id: 'INV${index + 1}',
-        invoiceId: 'INV-$month-${(index + 1).toString().padLeft(3, '0')}',
-        vendorId: 'VENDOR001',
-        customerId: cust['id'] as String,
-        month: month,
-        year: monthDate.year,
-        totalLiters: liters,
-        amount: amount,
-        pdfUrl: index < 3
-            ? 'https://example.com/invoices/${cust['id']}-$month.pdf'
-            : null,
-        paid: index % 3 == 0, // Every 3rd invoice is paid
-        paidAt: index % 3 == 0 ? DateTime.now().subtract(Duration(days: index)) : null,
-        generatedAt: DateTime.now().subtract(Duration(days: index + 1)),
-        createdAt: DateTime.now().subtract(Duration(days: index + 2)),
-        updatedAt: DateTime.now(),
-      );
-    }).toList();
-  }
 }
 
 /// Billing provider
 final billingProvider = StateNotifierProvider<BillingNotifier, BillingState>(
-  (ref) => BillingNotifier(),
+  (ref) => BillingNotifier(ref),
 );

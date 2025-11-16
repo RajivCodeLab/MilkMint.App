@@ -27,6 +27,9 @@ class AuthState with _$AuthState {
   /// User is authenticated
   const factory AuthState.authenticated(User user) = _Authenticated;
 
+  /// New user requires onboarding (profile completion)
+  const factory AuthState.requiresOnboarding(User user) = _RequiresOnboarding;
+
   /// Authentication error
   const factory AuthState.error(String message) = _Error;
 }

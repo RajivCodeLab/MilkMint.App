@@ -8,6 +8,9 @@ import '../../firebase_options.dart';
 /// Firebase service for initializing and managing Firebase services
 class FirebaseService {
   FirebaseService._();
+  
+  // Callback for token refresh - set by auth repository
+  static void Function(String token)? onTokenRefresh;
 
   static Future<void> initialize() async {
     try {
@@ -56,7 +59,10 @@ class FirebaseService {
       // Listen for token refresh
       messaging.onTokenRefresh.listen((newToken) {
         debugPrint('FCM Token refreshed: $newToken');
-        // TODO: Send new token to backend
+        // Send new token to backend via callback
+        if (onTokenRefresh != null) {
+          onTokenRefresh!(newToken);
+        }
       });
 
       // Handle foreground messages

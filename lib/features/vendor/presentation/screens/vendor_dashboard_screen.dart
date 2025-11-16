@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../features/auth/application/auth_provider.dart';
+import '../../application/dashboard_provider.dart';
+import '../../application/customer_provider.dart';
+import '../../application/delivery_log_provider.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/quick_action_button.dart';
 import '../widgets/delivery_completion_card.dart';
@@ -20,36 +24,32 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   int _currentNavIndex = 0;
 
   @override
-  Widget build(BuildContext context) {
-    final user = ref.watch(currentUserProvider);
+  void initState() {
+    super.initState();
+    // Load customer data and delivery logs on dashboard init
+    Future.microtask(() {
+      ref.read(customerProvider.notifier).loadCustomers();
+      ref.read(deliveryLogProvider.notifier).loadLogs();
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('MilkBill'),
-            if (user != null)
-              Text(
-                user.phone,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.white.withValues(alpha: 0.9),
-                ),
-              ),
-          ],
-        ),
+        title: const Text('Dashboard'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshDashboard,
+            tooltip: 'Refresh',
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              // TODO: Navigate to notifications
+              Navigator.pushNamed(context, AppRoutes.notifications);
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {
-              // TODO: Navigate to profile/settings
-            },
+            tooltip: 'Notifications',
           ),
         ],
       ),
@@ -89,10 +89,15 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
                 style: AppTextStyles.titleLarge,
               ),
               const SizedBox(height: 12),
-              const DeliveryCompletionCard(
-                totalCustomers: 45,
-                completedDeliveries: 32,
-                pendingDeliveries: 13,
+              Builder(
+                builder: (context) {
+                  final stats = ref.watch(dashboardStatsProvider);
+                  return DeliveryCompletionCard(
+                    totalCustomers: stats.totalDeliveries,
+                    completedDeliveries: stats.completedDeliveries,
+                    pendingDeliveries: stats.pendingDeliveries,
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
@@ -147,20 +152,22 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   }
 
   Widget _buildGreetingSection() {
-    final hour = DateTime.now().hour;
-    String greeting;
+    final greeting = ref.watch(greetingProvider);
+    final greetingType = ref.watch(greetingIconProvider);
+    final user = ref.watch(currentUserProvider);
+    
     IconData icon;
-
-    if (hour < 12) {
-      greeting = 'Good Morning';
+    if (greetingType == 'morning') {
       icon = Icons.wb_sunny_outlined;
-    } else if (hour < 17) {
-      greeting = 'Good Afternoon';
+    } else if (greetingType == 'afternoon') {
       icon = Icons.wb_sunny;
     } else {
-      greeting = 'Good Evening';
       icon = Icons.nightlight_outlined;
     }
+
+    final displayName = user?.firstName != null && user?.lastName != null
+        ? '${user!.firstName} ${user.lastName}'
+        : 'there';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -188,7 +195,7 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  greeting,
+                  '$greeting, $displayName!',
                   style: AppTextStyles.titleMedium.copyWith(
                     color: Colors.white,
                   ),
@@ -209,28 +216,30 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   }
 
   Widget _buildTodayStats() {
+    final stats = ref.watch(dashboardStatsProvider);
+    
     return Row(
       children: [
         Expanded(
           child: StatCard(
-            title: 'Total Deliveries',
-            value: '45',
-            icon: Icons.local_shipping_outlined,
+            title: 'Active Customers',
+            value: '${stats.activeCustomers}',
+            icon: Icons.people_outline,
             color: AppColors.primary,
             onTap: () {
-              // TODO: Navigate to deliveries list
+              Navigator.pushNamed(context, '/customers');
             },
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: StatCard(
-            title: 'Completed',
-            value: '32',
-            icon: Icons.check_circle_outline,
+            title: 'Daily Quantity',
+            value: '${stats.totalDailyQuantity.toStringAsFixed(1)}L',
+            icon: Icons.local_drink_outlined,
             color: AppColors.success,
             onTap: () {
-              // TODO: Navigate to completed deliveries
+              Navigator.pushNamed(context, '/delivery-log');
             },
           ),
         ),
@@ -276,7 +285,7 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
           label: 'Reports',
           color: AppColors.info,
           onTap: () {
-            // TODO: Navigate to reports
+            Navigator.pushNamed(context, AppRoutes.reports);
           },
         ),
         QuickActionButton(
@@ -290,9 +299,9 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
         QuickActionButton(
           icon: Icons.settings_outlined,
           label: 'Settings',
-          color: AppColors.textSecondary,
+          color: AppColors.accent,
           onTap: () {
-            // TODO: Navigate to settings
+            Navigator.pushNamed(context, AppRoutes.settings);
           },
         ),
       ],
@@ -379,15 +388,28 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   }
 
   Future<void> _refreshDashboard() async {
-    // TODO: Implement dashboard data refresh
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dashboard refreshed'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+    try {
+      await Future.wait([
+        ref.read(customerProvider.notifier).loadCustomers(),
+        ref.read(deliveryLogProvider.notifier).loadLogs(),
+      ]);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dashboard refreshed'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error refreshing: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 }

@@ -71,7 +71,7 @@ class _CustomerListScreenState extends ConsumerState<CustomerListScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withOpacity(0.8),
+                fillColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.8),
               ),
               onChanged: (query) {
                 ref.read(customerProvider.notifier).setSearchQuery(query);
@@ -363,3 +363,4 @@ class _CustomerListScreenState extends ConsumerState<CustomerListScreen> {
     }
   }
 }
+

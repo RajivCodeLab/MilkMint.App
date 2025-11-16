@@ -167,6 +167,28 @@ class OfflineSyncService {
 
       debugPrint('Syncing ${pendingActions.length} delivery logs...');
 
+      // Try batch sync first if multiple logs
+      if (pendingActions.length > 1) {
+        final batchResult = await _syncDeliveryLogsBatch(pendingActions);
+        if (batchResult != null) {
+          // Batch sync succeeded
+          for (final index in batchResult.syncedIndices) {
+            await box.deleteAt(index);
+          }
+          
+          _updateSyncStatus(
+            isSyncing: false,
+            syncedCount: batchResult.syncedCount,
+            failedCount: batchResult.failedCount,
+            lastSyncTime: DateTime.now(),
+          );
+          _isSyncing = false;
+          return;
+        }
+        // If batch fails, fall back to individual sync
+        debugPrint('Batch sync failed, falling back to individual sync');
+      }
+
       int syncedCount = 0;
       int failedCount = 0;
 
@@ -229,13 +251,67 @@ class OfflineSyncService {
     }
   }
 
+  /// Batch sync delivery logs to backend
+  Future<({int syncedCount, int failedCount, List<int> syncedIndices})?> _syncDeliveryLogsBatch(
+    List<Map<String, dynamic>> pendingActions,
+  ) async {
+    try {
+      final logs = pendingActions.map((action) {
+        final logData = action['data'] as Map<String, dynamic>;
+        final log = DeliveryLog.fromJson(logData);
+        // Send only fields backend expects
+        return {
+          'customerId': log.customerId,
+          'date': log.date.toIso8601String().split('T')[0],
+          'delivered': log.delivered,
+          'quantityDelivered': log.quantityDelivered,
+        };
+      }).toList();
+
+      final response = await _apiClient.post(
+        '/delivery-logs/batch',
+        data: {'logs': logs},
+      );
+
+      if (response.statusCode == 201) {
+        final data = response.data as Map<String, dynamic>;
+        final successCount = data['success'] as int? ?? 0;
+        final failedCount = data['failed'] as int? ?? 0;
+        
+        // Mark all as synced if batch succeeded
+        final syncedIndices = List<int>.generate(
+          pendingActions.length,
+          (index) => pendingActions[index]['index'] as int,
+        );
+        
+        debugPrint('Batch sync completed: $successCount synced, $failedCount failed');
+        
+        return (
+          syncedCount: successCount,
+          failedCount: failedCount,
+          syncedIndices: syncedIndices,
+        );
+      }
+      
+      return null;
+    } catch (e) {
+      debugPrint('Batch sync error: $e');
+      return null;
+    }
+  }
+
   /// Sync delivery log to backend with conflict resolution
   Future<bool> _syncDeliveryLogToBackend(DeliveryLog log) async {
     try {
-      // POST to backend
+      // POST to backend - send only the fields backend expects
       final response = await _apiClient.post(
         '/delivery-logs',
-        data: log.toJson(),
+        data: {
+          'customerId': log.customerId,
+          'date': log.date.toIso8601String().split('T')[0],
+          'delivered': log.delivered,
+          'quantityDelivered': log.quantityDelivered,
+        },
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
