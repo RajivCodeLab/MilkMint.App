@@ -1,4 +1,4 @@
-# MilkBill – Optimized Product Requirement Document (PRD)
+# MilkMint – Optimized Product Requirement Document (PRD)
 ### **Version 1.1 – Copilot-Ready | Fully Optimized | No Features Removed**
 
 This optimized PRD eliminates duplicates, merges overlapping sections, unifies wording, and aligns the full structure for AI agents (GitHub Copilot, Copilot Chat, etc.). All features from your original PRD are preserved.
@@ -6,7 +6,7 @@ This optimized PRD eliminates duplicates, merges overlapping sections, unifies w
 ---
 
 # 1. PRODUCT VISION
-MilkBill is a unified mobile application that enables milk vendors and customers to manage daily deliveries, billing, payments, and communication through a single role-based Flutter app.
+MilkMint is a unified mobile application that enables milk vendors and customers to manage daily deliveries, billing, payments, and communication through a single role-based Flutter app.
 
 **Core Pillars:**
 - Automated billing engine (monthly)
@@ -16,7 +16,7 @@ MilkBill is a unified mobile application that enables milk vendors and customers
 - Multi-language support
 - One app → Multiple roles (Vendor / Customer / Delivery Agent)
 
-MilkBill is designed to be:
+MilkMint is designed to be:
 - Fast and lightweight
 - Intuitive for low-tech users
 - Vendor-friendly and customer-friendly

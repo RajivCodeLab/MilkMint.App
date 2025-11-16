@@ -367,7 +367,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     // For demo, using a generic UPI ID (in production, use vendor's actual UPI ID)
     final upiId = 'vendor@upi'; // TODO: Get from vendor profile
     final upiUrl = Uri.parse(
-      'upi://pay?pa=$upiId&pn=MilkBill&am=${amount.toStringAsFixed(2)}&cu=INR&tn=Milk Payment',
+      'upi://pay?pa=$upiId&pn=MilkMint&am=${amount.toStringAsFixed(2)}&cu=INR&tn=Milk Payment',
     );
 
     try {

@@ -93,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Title
                 Text(
-                  'Welcome to MilkBill',
+                  'Welcome to MilkMint',
                   style: AppTextStyles.headlineLarge,
                   textAlign: TextAlign.center,
                 ),

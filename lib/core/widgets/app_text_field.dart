@@ -8,7 +8,7 @@ enum AppTextFieldVariant {
   filled, // Filled background style
 }
 
-/// Reusable custom text field widget with MilkBill styling
+/// Reusable custom text field widget with MilkMint styling
 class AppTextField extends StatelessWidget {
   final String? label;
   final String? hint;

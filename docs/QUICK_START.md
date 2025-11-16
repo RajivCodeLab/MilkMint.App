@@ -1,4 +1,4 @@
-# MilkBill Theme Quick Start Guide
+# MilkMint Theme Quick Start Guide
 
 ## 🚀 5-Minute Quick Start
 
@@ -462,7 +462,7 @@ class LoginScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Welcome to MilkBill',
+                'Welcome to MilkMint',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,

@@ -509,7 +509,7 @@ class _CustomerHomeScreenState extends ConsumerState<CustomerHomeScreen> {
     // UPI payment deep link
     final upiId = 'vendor@upi'; // TODO: Get from vendor profile
     final upiUrl = Uri.parse(
-      'upi://pay?pa=$upiId&pn=MilkBill&am=${amount.toStringAsFixed(2)}&cu=INR&tn=Milk Bill Payment',
+      'upi://pay?pa=$upiId&pn=MilkMint&am=${amount.toStringAsFixed(2)}&cu=INR&tn=Milk Bill Payment',
     );
 
     try {

@@ -36,7 +36,7 @@ void main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const MilkBillApp(),
+      child: const MilkMintApp(),
     ),
   );
 }
@@ -58,14 +58,14 @@ Future<void> _initializeServices() async {
   }
 }
 
-class MilkBillApp extends ConsumerStatefulWidget {
-  const MilkBillApp({super.key});
+class MilkMintApp extends ConsumerStatefulWidget {
+  const MilkMintApp({super.key});
 
   @override
-  ConsumerState<MilkBillApp> createState() => _MilkBillAppState();
+  ConsumerState<MilkMintApp> createState() => _MilkMintAppState();
 }
 
-class _MilkBillAppState extends ConsumerState<MilkBillApp> {
+class _MilkMintAppState extends ConsumerState<MilkMintApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override

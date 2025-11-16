@@ -4,7 +4,7 @@ import '../theme/app_colors.dart';
 import '../../models/user_role.dart';
 import '../../features/auth/application/auth_provider.dart';
 
-/// Custom navigation drawer for MilkBill app
+/// Custom navigation drawer for MilkMint app
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 

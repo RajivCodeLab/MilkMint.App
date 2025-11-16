@@ -1,7 +1,7 @@
-# MilkBill - Copilot Instructions
+# MilkMint - Copilot Instructions
 
 ## Project Overview
-MilkBill is a **role-based Flutter mobile app** for milk delivery management. A single app serves three roles dynamically: **Vendor**, **Customer**, and **Delivery Agent** (future). See `prd.md` for full requirements.
+MilkMint is a **role-based Flutter mobile app** for milk delivery management. A single app serves three roles dynamically: **Vendor**, **Customer**, and **Delivery Agent** (future). See `prd.md` for full requirements.
 
 **Key Architecture:**
 - **Frontend:** Flutter (Android/iOS) with offline-first delivery logging

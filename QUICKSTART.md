@@ -1,4 +1,4 @@
-# MilkBill - Quick Reference
+# MilkMint - Quick Reference
 
 ## ✅ What's Been Completed
 

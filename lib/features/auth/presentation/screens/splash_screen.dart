@@ -187,7 +187,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: const Text(
-                  'MilkBill',
+                  'MilkMint',
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-# MilkBill Visual Component Guide
+# MilkMint Visual Component Guide
 
 ## Quick Reference
 

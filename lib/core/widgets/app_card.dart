@@ -8,7 +8,7 @@ enum AppCardVariant {
   filled, // Card with background color
 }
 
-/// Reusable custom card widget with MilkBill styling
+/// Reusable custom card widget with MilkMint styling
 class AppCard extends StatelessWidget {
   final Widget child;
   final AppCardVariant variant;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// App color palette - MilkBill Fresh Mint Theme
+/// App color palette - MilkMint Fresh Mint Theme
 class AppColors {
   AppColors._();
 

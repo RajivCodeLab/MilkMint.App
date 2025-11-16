@@ -1,7 +1,7 @@
 # Offline Sync Service - Technical Documentation
 
 ## Overview
-The OfflineSyncService provides a robust offline-first architecture for the MilkBill app, ensuring that delivery logs and other critical data are never lost, even in areas with poor connectivity.
+The OfflineSyncService provides a robust offline-first architecture for the MilkMint app, ensuring that delivery logs and other critical data are never lost, even in areas with poor connectivity.
 
 ## Architecture
 

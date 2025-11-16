@@ -33,7 +33,7 @@
     "comingSoon": "Coming Soon"
   },
   "language": {
-    "title": "Welcome to MilkBill!",
+    "title": "Welcome to MilkMint!",
     "subtitle": "Your complete milk delivery management solution",
     "selectLanguage": "Select Your Language",
     "selectPreferredLanguage": "Choose your preferred language to continue",
@@ -69,7 +69,7 @@
     "loginSuccess": "Login successful",
     "loginFailed": "Login failed",
     "roleTitle": "Select Your Role",
-    "roleSubtitle": "Choose how you want to use MilkBill",
+    "roleSubtitle": "Choose how you want to use MilkMint",
     "vendor": "Vendor",
     "customer": "Customer",
     "vendorDesc": "Manage deliveries, customers, and billing",

@@ -1,7 +1,7 @@
 # Push Notifications System
 
 ## Overview
-MilkBill uses Firebase Cloud Messaging (FCM) for real-time push notifications. The notification system supports background/foreground handling, payload-based navigation, and topic subscriptions for targeted notifications.
+MilkMint uses Firebase Cloud Messaging (FCM) for real-time push notifications. The notification system supports background/foreground handling, payload-based navigation, and topic subscriptions for targeted notifications.
 
 ## Architecture
 

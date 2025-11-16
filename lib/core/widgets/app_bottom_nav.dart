@@ -14,7 +14,7 @@ class AppBottomNavItem {
   }) : activeIcon = activeIcon ?? icon;
 }
 
-/// Custom bottom navigation bar with MilkBill styling
+/// Custom bottom navigation bar with MilkMint styling
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;

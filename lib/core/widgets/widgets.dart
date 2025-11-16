@@ -1,6 +1,6 @@
-// MilkBill reusable widgets
+// MilkMint reusable widgets
 // 
-// This library exports all custom widgets for the MilkBill app.
+// This library exports all custom widgets for the MilkMint app.
 // Import this file to access all widgets in one go.
 
 // Buttons

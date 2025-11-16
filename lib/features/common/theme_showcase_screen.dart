@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/widgets/widgets.dart';
 import '../../core/theme/app_colors.dart';
 
-/// Demo screen showcasing all MilkBill custom widgets
+/// Demo screen showcasing all MilkMint custom widgets
 class ThemeShowcaseScreen extends StatefulWidget {
   const ThemeShowcaseScreen({super.key});
 

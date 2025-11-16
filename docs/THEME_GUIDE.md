@@ -1,7 +1,7 @@
-# MilkBill Theme System
+# MilkMint Theme System
 
 ## Overview
-MilkBill uses a fresh, energetic **mint green** theme that reflects the dairy/milk delivery brand. The design is clean, modern, and optimized for quick actions with rounded cards, soft shadows, and warm accent colors.
+MilkMint uses a fresh, energetic **mint green** theme that reflects the dairy/milk delivery brand. The design is clean, modern, and optimized for quick actions with rounded cards, soft shadows, and warm accent colors.
 
 ---
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Custom button variants for MilkBill app
+/// Custom button variants for MilkMint app
 enum AppButtonVariant {
   primary, // Mint gradient button
   secondary, // Outlined mint button
@@ -17,7 +17,7 @@ enum AppButtonSize {
   large,
 }
 
-/// Reusable custom button widget with MilkBill styling
+/// Reusable custom button widget with MilkMint styling
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;

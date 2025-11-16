@@ -133,7 +133,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Welcome to MilkBill!',
+                  'Welcome to MilkMint!',
                   style: AppTextStyles.headlineLarge,
                   textAlign: TextAlign.center,
                 ),

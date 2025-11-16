@@ -1,4 +1,4 @@
-# MilkBill - Complete Project Structure
+# MilkMint - Complete Project Structure
 
 ## Architecture Overview
 Following **Clean Architecture** + **Feature-First** organization with clear layer separation:
