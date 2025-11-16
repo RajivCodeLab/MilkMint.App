@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../../../models/delivery/delivery_log.dart';
 import '../../../core/offline/offline_sync_service.dart';
 import '../../../data/providers/remote_data_source_providers.dart';
@@ -40,11 +41,11 @@ class DeliveryLogState {
   }
 
   List<DeliveryLog> get todayLogs {
-    final today = DateTime.now();
+    // Use selectedDate instead of always using today
+    final selected = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
     return logs.where((log) {
-      return log.date.year == today.year &&
-          log.date.month == today.month &&
-          log.date.day == today.day;
+      final logDate = DateTime(log.date.year, log.date.month, log.date.day);
+      return logDate.isAtSameMomentAs(selected);
     }).toList();
   }
 
@@ -78,32 +79,84 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
-      final remoteDs = _ref.read(deliveryLogRemoteDataSourceProvider);
       final selectedDate = date ?? DateTime.now();
+      List<DeliveryLog> apiLogs = [];
       
-      // Load from API with date range
-      final startDate = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-      final endDate = startDate.add(const Duration(days: 1));
+      // Try to load from API, but don't fail if it's not available
+      try {
+        final remoteDs = _ref.read(deliveryLogRemoteDataSourceProvider);
+        
+        // Backend now stores dates correctly at UTC midnight
+        // Query for the selected date only (same start and end date)
+        final localDate = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+        
+        apiLogs = await remoteDs.getLogsByDateRange(
+          startDate: localDate,
+          endDate: localDate,  // Same date for exact day match
+        );
+      } catch (apiError) {
+        // API not available, continue with offline data only
+        debugPrint('API not available, using offline data only: $apiError');
+      }
       
-      final apiLogs = await remoteDs.getLogsByDateRange(
-        startDate: startDate,
-        endDate: endDate,
-      );
-      
-      // Load from offline queue
+      // Load from offline queue - this is the primary source for unsynced logs
       final queuedLogs = await _syncService.getPendingDeliveryLogs();
       
+      // Filter queued logs to only include today's logs for the selected date
+      final todayQueuedLogs = queuedLogs.where((log) {
+        return log.date.year == selectedDate.year &&
+            log.date.month == selectedDate.month &&
+            log.date.day == selectedDate.day;
+      }).toList();
+      
+      // Merge API logs with queued logs, removing duplicates
+      // Prioritize queued logs (they are newer/unsynced changes)
+      final allLogsMap = <String, DeliveryLog>{};
+      
+      // Add API logs first - mark as synced since they came from server
+      for (final log in apiLogs) {
+        // Use local date for key to avoid timezone issues
+        final logLocalDate = DateTime(log.date.year, log.date.month, log.date.day);
+        final key = '${log.customerId}_${logLocalDate.toIso8601String().split('T')[0]}';
+        allLogsMap[key] = log.copyWith(synced: true);
+      }
+      
+      // Override with queued logs (these are unsynced, keep synced: false)
+      for (final log in todayQueuedLogs) {
+        final logLocalDate = DateTime(log.date.year, log.date.month, log.date.day);
+        final key = '${log.customerId}_${logLocalDate.toIso8601String().split('T')[0]}';
+        allLogsMap[key] = log;
+      }
+      
       state = state.copyWith(
-        logs: [...apiLogs, ...queuedLogs],
+        logs: allLogsMap.values.toList(),
         isLoading: false,
         pendingSyncCount: queuedLogs.length,
         selectedDate: date,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      // Even if there's an error, try to load from offline queue
+      try {
+        final queuedLogs = await _syncService.getPendingDeliveryLogs();
+        final selectedDate = date ?? DateTime.now();
+        final todayQueuedLogs = queuedLogs.where((log) {
+          return log.date.year == selectedDate.year &&
+              log.date.month == selectedDate.month &&
+              log.date.day == selectedDate.day;
+        }).toList();
+        
+        state = state.copyWith(
+          logs: todayQueuedLogs,
+          isLoading: false,
+          pendingSyncCount: queuedLogs.length,
+          error: 'Using offline data only',
+        );
+      } catch (offlineError) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Failed to load delivery logs: $e',
+        );
+      }
     }
   }
 
@@ -113,12 +166,16 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
     required double quantity,
   }) async {
     try {
+      // Use the selected date from state (defaults to today if not set)
+      final selectedDate = state.selectedDate;
+      final logDate = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+      
       final existingLog = state.todayLogs.firstWhere(
         (log) => log.customerId == customerId,
         orElse: () => DeliveryLog(
           vendorId: 'vendor1', // TODO: Get from auth
           customerId: customerId,
-          date: DateTime.now(),
+          date: logDate,
           delivered: false,
           quantityDelivered: 0,
           timestamp: DateTime.now(),

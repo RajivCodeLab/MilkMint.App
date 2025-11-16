@@ -8,7 +8,7 @@ class DeliveryLog with _$DeliveryLog {
   const factory DeliveryLog({
     @JsonKey(name: '_id') String? id,
     required String vendorId,
-    required String customerId,
+    @JsonKey(name: 'customerId', fromJson: _customerIdFromJson) required String customerId,
     required DateTime date,
     @Default(true) bool delivered,
     double? quantityDelivered, // Actual quantity delivered
@@ -20,4 +20,15 @@ class DeliveryLog with _$DeliveryLog {
 
   factory DeliveryLog.fromJson(Map<String, dynamic> json) =>
       _$DeliveryLogFromJson(json);
+}
+
+/// Helper function to extract customerId from API response
+/// Handles both string format and object format {_id: "...", name: "..."}
+String _customerIdFromJson(dynamic value) {
+  if (value is String) {
+    return value;
+  } else if (value is Map<String, dynamic>) {
+    return value['_id'] as String;
+  }
+  throw Exception('Invalid customerId format: $value');
 }

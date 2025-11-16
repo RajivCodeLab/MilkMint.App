@@ -10,7 +10,7 @@ _$DeliveryLogImpl _$$DeliveryLogImplFromJson(Map<String, dynamic> json) =>
     _$DeliveryLogImpl(
       id: json['_id'] as String?,
       vendorId: json['vendorId'] as String,
-      customerId: json['customerId'] as String,
+      customerId: _customerIdFromJson(json['customerId']),
       date: DateTime.parse(json['date'] as String),
       delivered: json['delivered'] as bool? ?? true,
       quantityDelivered: (json['quantityDelivered'] as num?)?.toDouble(),

@@ -69,10 +69,10 @@ class DeliveryCompletionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: totalCustomers > 0
-                    ? completedDeliveries / totalCustomers
+                    ? (completedDeliveries / totalCustomers).clamp(0.0, 1.0)
                     : 0,
                 minHeight: 12,
-                backgroundColor: AppColors.border,
+                backgroundColor: AppColors.border.withValues(alpha: 0.3),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   completionPercentage == 100
                       ? AppColors.success

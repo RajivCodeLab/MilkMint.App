@@ -17,6 +17,8 @@ import '../../features/vendor/presentation/screens/reports_screen.dart';
 import '../../features/vendor/presentation/screens/settings_screen.dart';
 import '../../features/vendor/presentation/screens/edit_profile_screen.dart';
 import '../../features/common/presentation/screens/notifications_screen.dart';
+import '../../features/common/presentation/screens/profile_screen.dart';
+import '../../features/common/presentation/screens/support_screen.dart';
 import '../../features/customer/presentation/screens/customer_home_screen.dart';
 import '../../features/customer/presentation/screens/holiday_request_screen.dart';
 import '../../features/customer/presentation/screens/delivery_history_screen.dart';
@@ -41,6 +43,8 @@ class AppRoutes {
   static const String payments = '/payments';
   static const String reports = '/reports';
   static const String settings = '/settings';
+  static const String profile = '/profile';
+  static const String support = '/support';
   static const String editProfile = '/edit-profile';
   static const String notifications = '/notifications';
   static const String holidayRequest = '/holiday-request';
@@ -126,6 +130,16 @@ class AppRoutes {
       case AppRoutes.settings:
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),
+        );
+
+      case profile:
+        return MaterialPageRoute(
+          builder: (_) => const ProfileScreen(),
+        );
+
+      case support:
+        return MaterialPageRoute(
+          builder: (_) => const SupportScreen(),
         );
 
       case editProfile:

@@ -24,6 +24,7 @@ mixin _$DeliveryLog {
   @JsonKey(name: '_id')
   String? get id => throw _privateConstructorUsedError;
   String get vendorId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
   String get customerId => throw _privateConstructorUsedError;
   DateTime get date => throw _privateConstructorUsedError;
   bool get delivered => throw _privateConstructorUsedError;
@@ -55,6 +56,7 @@ abstract class $DeliveryLogCopyWith<$Res> {
   $Res call({
     @JsonKey(name: '_id') String? id,
     String vendorId,
+    @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
     String customerId,
     DateTime date,
     bool delivered,
@@ -152,6 +154,7 @@ abstract class _$$DeliveryLogImplCopyWith<$Res>
   $Res call({
     @JsonKey(name: '_id') String? id,
     String vendorId,
+    @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
     String customerId,
     DateTime date,
     bool delivered,
@@ -241,6 +244,7 @@ class _$DeliveryLogImpl implements _DeliveryLog {
   const _$DeliveryLogImpl({
     @JsonKey(name: '_id') this.id,
     required this.vendorId,
+    @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
     required this.customerId,
     required this.date,
     this.delivered = true,
@@ -260,6 +264,7 @@ class _$DeliveryLogImpl implements _DeliveryLog {
   @override
   final String vendorId;
   @override
+  @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
   final String customerId;
   @override
   final DateTime date;
@@ -343,6 +348,7 @@ abstract class _DeliveryLog implements DeliveryLog {
   const factory _DeliveryLog({
     @JsonKey(name: '_id') final String? id,
     required final String vendorId,
+    @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
     required final String customerId,
     required final DateTime date,
     final bool delivered,
@@ -362,6 +368,7 @@ abstract class _DeliveryLog implements DeliveryLog {
   @override
   String get vendorId;
   @override
+  @JsonKey(name: 'customerId', fromJson: _customerIdFromJson)
   String get customerId;
   @override
   DateTime get date;

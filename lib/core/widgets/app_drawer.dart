@@ -32,9 +32,9 @@ class AppDrawer extends ConsumerWidget {
               // Navigation items
               Expanded(
                 child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
                     ),
@@ -66,9 +66,10 @@ class AppDrawer extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.all(24),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profile avatar
+          // Profile avatar on the left
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -82,58 +83,64 @@ class AppDrawer extends ConsumerWidget {
               ],
             ),
             child: CircleAvatar(
-              radius: 40,
+              radius: 35,
               backgroundColor: Colors.white,
               child: Text(
                 initials,
                 style: const TextStyle(
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          // User name or phone number
-          Text(
-            displayName,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (user?.address != null) ...[
-            const SizedBox(height: 4),
-            // Address
-            Text(
-              user!.address!,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white70,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          const SizedBox(height: 8),
-          // Role badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              user?.role.displayName ?? 'User',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+          const SizedBox(width: 16),
+          // User info on the right
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User name or phone number
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                if (user?.address != null) ...[
+                  const SizedBox(height: 4),
+                  // Address
+                  Text(
+                    user!.address!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.white70,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 8),
+                // Role badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user?.role.displayName ?? 'User',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -156,7 +163,7 @@ class AppDrawer extends ConsumerWidget {
         title: 'Customers',
         onTap: () {
           Navigator.pop(context);
-          Navigator.pushNamed(context, '/manage-customers');
+          Navigator.pushNamed(context, '/customers');
         },
       ),
       _DrawerItem(
@@ -214,10 +221,10 @@ class AppDrawer extends ConsumerWidget {
       ),
       _DrawerItem(
         icon: Icons.receipt_outlined,
-        title: 'Bills & Payments',
+        title: 'My Bills',
         onTap: () {
           Navigator.pop(context);
-          Navigator.pushNamed(context, '/customer-payments');
+          Navigator.pushNamed(context, '/customer-bills');
         },
       ),
       _DrawerItem(
@@ -254,6 +261,14 @@ class AppDrawer extends ConsumerWidget {
 
   List<Widget> _buildCommonItems(BuildContext context, WidgetRef ref) {
     return [
+      _DrawerItem(
+        icon: Icons.notifications_outlined,
+        title: 'Notifications',
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.pushNamed(context, '/notifications');
+        },
+      ),
       _DrawerItem(
         icon: Icons.person_outline,
         title: 'Profile',
@@ -337,10 +352,11 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final itemColor = iconColor ?? Theme.of(context).colorScheme.primary;
     return ListTile(
       leading: Icon(
         icon,
-        color: iconColor ?? AppColors.primary,
+        color: itemColor,
         size: 24,
       ),
       title: Text(
@@ -348,7 +364,7 @@ class _DrawerItem extends StatelessWidget {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: textColor ?? AppColors.textPrimary,
+          color: textColor ?? itemColor,
         ),
       ),
       onTap: onTap,
