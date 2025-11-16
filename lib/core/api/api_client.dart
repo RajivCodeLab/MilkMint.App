@@ -3,15 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../auth/auth_service.dart';
+import '../../features/auth/application/auth_provider.dart' as auth_prov;
 
 /// API client for making HTTP requests
 class ApiClient {
-  ApiClient(this._dio, this._authService) {
+  ApiClient(this._dio, this._authService, {required Ref ref}) : _ref = ref {
     _setupInterceptors();
   }
 
   final Dio _dio;
   final AuthService _authService;
+  final Ref _ref;
 
   /// Setup Dio interceptors
   void _setupInterceptors() {
@@ -67,9 +69,35 @@ class ApiClient {
                   queryParameters: opts.queryParameters,
                 );
                 return handler.resolve(cloneReq);
+              } else {
+                // Token refresh returned null - user needs to re-login
+                debugPrint('⚠️ Token refresh returned null - logging out user');
+                await _authService.signOut();
+                // Trigger auth provider logout to update UI state
+                _ref.read(authProviderNotifier).logout();
+                // Return error to stop further retries
+                return handler.reject(
+                  DioException(
+                    requestOptions: error.requestOptions,
+                    error: 'Session expired. Please login again.',
+                    type: DioExceptionType.cancel,
+                  ),
+                );
               }
             } catch (e) {
-              debugPrint('Token refresh failed: $e');
+              debugPrint('Token refresh failed: $e - logging out user');
+              // Token refresh failed completely - log out the user
+              await _authService.signOut();
+              // Trigger auth provider logout to update UI state
+              _ref.read(authProviderNotifier).logout();
+              // Return error to stop further retries
+              return handler.reject(
+                DioException(
+                  requestOptions: error.requestOptions,
+                  error: 'Session expired. Please login again.',
+                  type: DioExceptionType.cancel,
+                ),
+              );
             }
           }
 
@@ -306,9 +334,14 @@ final dioProvider = Provider<Dio>((ref) {
   );
 });
 
+/// Auth provider notifier for logout
+final authProviderNotifier = Provider((ref) {
+  return ref.read(auth_prov.authProvider.notifier);
+});
+
 /// Provider for ApiClient
 final apiClientProvider = Provider<ApiClient>((ref) {
   final dio = ref.watch(dioProvider);
   final authService = ref.watch(authServiceProvider);
-  return ApiClient(dio, authService);
+  return ApiClient(dio, authService, ref: ref);
 });

@@ -237,31 +237,52 @@ class _DeliveryLogScreenState extends ConsumerState<DeliveryLogScreen> {
     required Color color,
   }) {
     return Expanded(
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Auto-adjust based on available width
+          final isNarrow = constraints.maxWidth < 100;
+          final iconSize = isNarrow ? 16.0 : 20.0;
+          final labelFontSize = isNarrow ? 10.0 : 12.0;
+          final valueFontSize = isNarrow ? 16.0 : 20.0;
+          final spacing = isNarrow ? 4.0 : 8.0;
+          
+          return Row(
+            children: [
+              Icon(icon, color: color, size: iconSize),
+              SizedBox(width: spacing),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        label,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: labelFontSize,
+                        ),
+                      ),
+                    ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: valueFontSize,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  value,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

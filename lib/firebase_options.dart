@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvU40QCI0Jj8SPAu2BIHRMWUt5Bzg5lA0',
-    appId: '1:404484728694:web:c22a84e4eff51ab9567c57',
-    messagingSenderId: '404484728694',
-    projectId: 'smartdwaardev',
-    authDomain: 'smartdwaardev.firebaseapp.com',
-    storageBucket: 'smartdwaardev.firebasestorage.app',
-    measurementId: 'G-JHFR6KG2GG',
+    apiKey: 'AIzaSyCom1bTNGTk27YVzmXSJDy8paMZ_l2URok',
+    appId: '1:150118273896:web:a4923ca6cf28c562533cdd',
+    messagingSenderId: '150118273896',
+    projectId: 'milkmint-dev',
+    authDomain: 'milkmint-dev.firebaseapp.com',
+    storageBucket: 'milkmint-dev.firebasestorage.app',
+    measurementId: 'G-F7FTGVB5CN',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCGFKzuqEgUZbTOk-x5vnB3yPT92juJcGU',
-    appId: '1:404484728694:android:4f3338d92ef8cb2e567c57',
-    messagingSenderId: '404484728694',
-    projectId: 'smartdwaardev',
-    storageBucket: 'smartdwaardev.firebasestorage.app',
+    apiKey: 'AIzaSyA4Hhk-hOZyvRBYHVgnYjJMLhEO5Y8cEIw',
+    appId: '1:150118273896:android:ae467b7f084d6c50533cdd',
+    messagingSenderId: '150118273896',
+    projectId: 'milkmint-dev',
+    storageBucket: 'milkmint-dev.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBl1xgVWX1SaXoCwpOnjPYBU9SefJC3tnY',
-    appId: '1:404484728694:ios:16ebdece022b255a567c57',
-    messagingSenderId: '404484728694',
-    projectId: 'smartdwaardev',
-    storageBucket: 'smartdwaardev.firebasestorage.app',
+    apiKey: 'AIzaSyA8cSojmF0NrVDzJXAUr7N_Vu9o92BSH7A',
+    appId: '1:150118273896:ios:83a7e3ccd0f4f066533cdd',
+    messagingSenderId: '150118273896',
+    projectId: 'milkmint-dev',
+    storageBucket: 'milkmint-dev.firebasestorage.app',
     iosBundleId: 'com.example.milkManagerApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBl1xgVWX1SaXoCwpOnjPYBU9SefJC3tnY',
-    appId: '1:404484728694:ios:16ebdece022b255a567c57',
-    messagingSenderId: '404484728694',
-    projectId: 'smartdwaardev',
-    storageBucket: 'smartdwaardev.firebasestorage.app',
+    apiKey: 'AIzaSyA8cSojmF0NrVDzJXAUr7N_Vu9o92BSH7A',
+    appId: '1:150118273896:ios:83a7e3ccd0f4f066533cdd',
+    messagingSenderId: '150118273896',
+    projectId: 'milkmint-dev',
+    storageBucket: 'milkmint-dev.firebasestorage.app',
     iosBundleId: 'com.example.milkManagerApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBvU40QCI0Jj8SPAu2BIHRMWUt5Bzg5lA0',
-    appId: '1:404484728694:web:b156a1b8c78cb3c3567c57',
-    messagingSenderId: '404484728694',
-    projectId: 'smartdwaardev',
-    authDomain: 'smartdwaardev.firebaseapp.com',
-    storageBucket: 'smartdwaardev.firebasestorage.app',
-    measurementId: 'G-DL7X9CTDS7',
+    apiKey: 'AIzaSyCom1bTNGTk27YVzmXSJDy8paMZ_l2URok',
+    appId: '1:150118273896:web:b37fcd4d154ee1ea533cdd',
+    messagingSenderId: '150118273896',
+    projectId: 'milkmint-dev',
+    authDomain: 'milkmint-dev.firebaseapp.com',
+    storageBucket: 'milkmint-dev.firebasestorage.app',
+    measurementId: 'G-XX3XBY9PHP',
   );
+
 }

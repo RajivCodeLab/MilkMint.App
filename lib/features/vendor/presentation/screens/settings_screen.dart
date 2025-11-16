@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/auth/firebase_service.dart';
 import '../../../../features/auth/application/auth_provider.dart';
 import '../../application/user_provider.dart';
 
@@ -158,25 +161,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   _SettingsCard(
                     children: [
                       _SettingsTile(
-                        icon: Icons.dark_mode_outlined,
+                        icon: Icons.brightness_6_outlined,
                         title: 'Theme',
-                        subtitle: 'Light Mode',
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.accent.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'Coming Soon',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.accent,
-                            ),
-                          ),
-                        ),
-                        onTap: () => _showComingSoon(context, 'Dark Mode'),
+                        subtitle: _getThemeName(ref.watch(themeModeProvider)),
+                        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                        onTap: () => _showThemeDialog(context),
                       ),
                       const Divider(height: 1),
                       _SettingsTile(
@@ -241,6 +230,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         subtitle: 'You\'re on the latest version',
                         onTap: () => _checkUpdates(context),
                       ),
+                      const Divider(height: 1),
+                      _FCMTokenTile(),
                       const Divider(height: 1),
                       _SettingsTile(
                         icon: Icons.description_outlined,
@@ -310,6 +301,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  String _getThemeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System Default';
+    }
+  }
+
   void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -375,6 +377,83 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    final currentTheme = ref.read(themeModeProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Icon(Icons.brightness_6, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Select Theme',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 24),
+            _ThemeOption(
+              mode: ThemeMode.light,
+              title: 'Light',
+              subtitle: 'Always use light theme',
+              icon: Icons.wb_sunny_outlined,
+              current: currentTheme,
+              onTap: () => _updateTheme(context, ThemeMode.light),
+            ),
+            _ThemeOption(
+              mode: ThemeMode.dark,
+              title: 'Dark',
+              subtitle: 'Always use dark theme',
+              icon: Icons.nightlight_outlined,
+              current: currentTheme,
+              onTap: () => _updateTheme(context, ThemeMode.dark),
+            ),
+            _ThemeOption(
+              mode: ThemeMode.system,
+              title: 'System Default',
+              subtitle: 'Follow system settings',
+              icon: Icons.brightness_auto_outlined,
+              current: currentTheme,
+              onTap: () => _updateTheme(context, ThemeMode.system),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateTheme(BuildContext context, ThemeMode mode) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    
+    navigator.pop();
+    await ref.read(themeModeProvider.notifier).setThemeMode(mode);
+    
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Theme changed to ${_getThemeName(mode)}'),
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -756,6 +835,191 @@ class _LanguageOption extends StatelessWidget {
           ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
           : null,
       onTap: isSelected ? null : onTap,
+    );
+  }
+}
+
+// Theme Option Widget
+class _ThemeOption extends StatelessWidget {
+  final ThemeMode mode;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final ThemeMode current;
+  final VoidCallback onTap;
+
+  const _ThemeOption({
+    required this.mode,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.current,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = mode == current;
+    final theme = Theme.of(context);
+
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          size: 22,
+        ),
+      ),
+      title: Text(
+        title,
+        style: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: AppTextStyles.bodySmall.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+          : null,
+      onTap: isSelected ? null : onTap,
+    );
+  }
+}
+
+// FCM Token Tile Widget
+class _FCMTokenTile extends ConsumerWidget {
+  const _FCMTokenTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fcmTokenAsync = ref.watch(fcmTokenProvider);
+    final theme = Theme.of(context);
+
+    return fcmTokenAsync.when(
+      data: (token) {
+        if (token == null) {
+          return ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.notifications_active_outlined, color: theme.colorScheme.primary, size: 22),
+            ),
+            title: Text(
+              'FCM Token',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            subtitle: Text(
+              'Token not available',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          );
+        }
+
+        return ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.notifications_active_outlined, color: theme.colorScheme.primary, size: 22),
+          ),
+          title: Text(
+            'FCM Token (for testing)',
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            'Tap to copy',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          trailing: const Icon(Icons.copy, size: 20),
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: token));
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('FCM Token copied to clipboard!'),
+                backgroundColor: AppColors.success,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+        );
+      },
+      loading: () => ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+        title: Text(
+          'FCM Token',
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          'Loading...',
+          style: AppTextStyles.bodySmall.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
+      error: (_, __) => ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.error.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.error_outline, color: AppColors.error, size: 22),
+        ),
+        title: Text(
+          'FCM Token',
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          'Failed to load token',
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.error,
+          ),
+        ),
+      ),
     );
   }
 }

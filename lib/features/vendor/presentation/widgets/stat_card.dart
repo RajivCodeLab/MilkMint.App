@@ -29,49 +29,69 @@ class StatCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 12),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Auto-adjust based on available width
+            final isNarrow = constraints.maxWidth < 160;
+            final iconSize = isNarrow ? 40.0 : 48.0;
+            final iconInnerSize = isNarrow ? 20.0 : 24.0;
+            final valueFontSize = isNarrow ? 24.0 : 32.0;
+            final titleFontSize = isNarrow ? 11.0 : 12.0;
+            
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Icon
+                  Container(
+                    width: iconSize,
+                    height: iconSize,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: color,
+                      size: iconInnerSize,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-              // Value
-              Text(
-                value,
-                style: AppTextStyles.headlineLarge.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
+                  // Value
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: AppTextStyles.headlineLarge.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: valueFontSize,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
 
-              // Title
-              Text(
-                title,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                  // Title
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: titleFontSize,
+                      ),
+                      maxLines: 2,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

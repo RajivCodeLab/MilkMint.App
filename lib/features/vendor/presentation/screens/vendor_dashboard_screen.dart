@@ -57,7 +57,7 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
         onRefresh: _refreshDashboard,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -252,8 +252,8 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
+      mainAxisSpacing: 6,
+      crossAxisSpacing: 6,
       childAspectRatio: 1,
       children: [
         QuickActionButton(
@@ -293,7 +293,7 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
           label: 'Holidays',
           color: AppColors.warning,
           onTap: () {
-            // TODO: Navigate to holiday requests
+            Navigator.pushNamed(context, AppRoutes.holidays);
           },
         ),
         QuickActionButton(

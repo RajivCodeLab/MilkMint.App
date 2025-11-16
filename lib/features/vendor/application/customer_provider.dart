@@ -94,6 +94,11 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
   final Ref _ref;
 
   Future<void> loadCustomers() async {
+    // Don't load if already loading to prevent concurrent requests
+    if (state.isLoading) {
+      return;
+    }
+    
     state = state.copyWith(isLoading: true, error: null);
     try {
       final remoteDs = _ref.read(customerRemoteDataSourceProvider);
@@ -108,6 +113,7 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
         isLoading: false,
         error: e.toString(),
       );
+      // Don't rethrow - just set error state to prevent retry loops
     }
   }
 

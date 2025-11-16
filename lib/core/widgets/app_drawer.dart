@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_colors.dart';
+import '../router/app_routes.dart';
 import '../../models/user_role.dart';
 import '../../features/auth/application/auth_provider.dart';
 
@@ -298,39 +299,31 @@ class AppDrawer extends ConsumerWidget {
         title: 'Logout',
         iconColor: AppColors.error,
         textColor: AppColors.error,
-        onTap: () {
-          Navigator.pop(context);
-          _showLogoutDialog(context, ref);
+        onTap: () async {
+          debugPrint('🔴 Logout button pressed');
+          // Get the auth notifier and close drawer immediately
+          final authNotifier = ref.read(authProvider.notifier);
+          Navigator.pop(context); // Close drawer
+          
+          debugPrint('🔴 Drawer closed, calling logout...');
+          await authNotifier.logout();
+          debugPrint('🔴 Logout completed, navigating to splash...');
+          
+          // Navigate to splash which will redirect to language selection
+          if (context.mounted) {
+            debugPrint('🔴 Context is mounted, pushing splash route');
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.splash,
+              (route) => false, // Remove all previous routes
+            );
+            debugPrint('🔴 Navigation completed');
+          } else {
+            debugPrint('❌ Context not mounted!');
+          }
         },
       ),
     ];
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(authProvider.notifier).logout();
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

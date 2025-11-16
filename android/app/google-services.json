@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "404484728694",
-    "project_id": "smartdwaardev",
-    "storage_bucket": "smartdwaardev.firebasestorage.app"
+    "project_number": "150118273896",
+    "project_id": "milkmint-dev",
+    "storage_bucket": "milkmint-dev.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:404484728694:android:4f3338d92ef8cb2e567c57",
+        "mobilesdk_app_id": "1:150118273896:android:ae467b7f084d6c50533cdd",
         "android_client_info": {
           "package_name": "com.example.milk_manager_app"
         }
@@ -15,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCGFKzuqEgUZbTOk-x5vnB3yPT92juJcGU"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:404484728694:android:16de12537eb93af1567c57",
-        "android_client_info": {
-          "package_name": "com.example.smartdwaar_app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCGFKzuqEgUZbTOk-x5vnB3yPT92juJcGU"
+          "current_key": "AIzaSyA4Hhk-hOZyvRBYHVgnYjJMLhEO5Y8cEIw"
         }
       ],
       "services": {

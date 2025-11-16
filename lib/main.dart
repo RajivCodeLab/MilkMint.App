@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/auth/firebase_service.dart';
 import 'core/offline/hive_service.dart';
 import 'core/services/notification_service.dart';
@@ -88,6 +89,7 @@ class _MilkMintAppState extends ConsumerState<MilkMintApp> {
   Widget build(BuildContext context) {
     final currentLocale = ref.watch(languageProvider);
     final languageCode = currentLocale.languageCode;
+    final themeMode = ref.watch(themeModeProvider);
 
     // Listen to notification navigation events
     ref.listen<AsyncValue<NotificationPayload>>(
@@ -106,7 +108,7 @@ class _MilkMintAppState extends ConsumerState<MilkMintApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       locale: Locale(languageCode),
       supportedLocales: const [
         Locale('en'),

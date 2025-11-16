@@ -110,13 +110,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Logout
   Future<void> logout() async {
+    debugPrint('🔴 AuthNotifier.logout() called');
     try {
       // Unsubscribe from all notification topics
+      debugPrint('🔴 Unsubscribing from notification topics...');
       await _unsubscribeFromNotificationTopics();
 
+      debugPrint('🔴 Calling repository.logout()...');
       await _repository.logout();
+      debugPrint('🔴 Setting state to unauthenticated');
       state = const AuthState.unauthenticated();
+      debugPrint('✅ Logout completed successfully');
     } catch (e) {
+      debugPrint('❌ Logout error: $e');
       state = AuthState.error('Logout failed: ${e.toString()}');
     }
   }

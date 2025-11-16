@@ -1,0 +1,27 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "milkmint_logo.png"
+  min_sdk_android: 21
+  
+  # Android adaptive icon (optional - uses same image for foreground)
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "milkmint_logo.png"
+  
+  # Web (optional)
+  web:
+    generate: true
+    image_path: "milkmint_logo.png"
+    background_color: "#FFFFFF"
+    theme_color: "#4CAF50"
+  
+  # Windows (optional)
+  windows:
+    generate: true
+    image_path: "milkmint_logo.png"
+    icon_size: 48
+  
+  # macOS (optional)
+  macos:
+    generate: true
+    image_path: "milkmint_logo.png"

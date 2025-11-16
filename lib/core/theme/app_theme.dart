@@ -121,6 +121,15 @@ class AppTheme {
       thickness: 1,
       space: 1,
     ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.primary,
+      contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+        color: Colors.white,
+      ),
+      actionTextColor: Colors.white,
+      behavior: SnackBarBehavior.fixed,
+      elevation: 4,
+    ),
     textTheme: const TextTheme(
       displayLarge: AppTextStyles.displayLarge,
       displayMedium: AppTextStyles.displayMedium,
@@ -256,6 +265,15 @@ class AppTheme {
       color: AppColors.dividerDark,
       thickness: 1,
       space: 1,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.primaryLight,
+      contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+        color: Colors.black,
+      ),
+      actionTextColor: Colors.black,
+      behavior: SnackBarBehavior.fixed,
+      elevation: 4,
     ),
     textTheme: const TextTheme(
       displayLarge: AppTextStyles.displayLarge,

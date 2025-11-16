@@ -8,7 +8,7 @@ class AppConstants {
 
   // API Configuration
   static const String baseUrl =
-      'http://localhost:3000/v1'; // Updated to match backend route
+      'http://192.168.1.8:3000/api/v1'; // Updated to match backend route
   static const Duration apiTimeout = Duration(seconds: 30);
   static const Duration connectionTimeout = Duration(seconds: 30);
 

@@ -16,7 +16,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -61,13 +61,13 @@ class LanguageSelectionScreen extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              Text(
-                'ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              // Text(
+              //   'ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+              //   style: AppTextStyles.bodyMedium.copyWith(
+              //     color: AppColors.textSecondary,
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
               const SizedBox(height: 32),
 
               // Language Options
@@ -89,14 +89,15 @@ class LanguageSelectionScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              _LanguageOption(
-                title: 'ಕನ್ನಡ',
-                subtitle: 'Kannada',
-                languageCode: 'kn',
-                isSelected: currentLanguage == 'kn',
-                onTap: () => _selectLanguage(context, ref, 'kn'),
-              ),
-              const SizedBox(height: 64),
+              // _LanguageOption(
+              //   title: 'ಕನ್ನಡ',
+              //   subtitle: 'Kannada',
+              //   languageCode: 'kn',
+              //   isSelected: currentLanguage == 'kn',
+              //   onTap: () => _selectLanguage(context, ref, 'kn'),
+              // ),
+              // const SizedBox(height: 12),
+              const SizedBox(height: 32),
 
               // Continue Button (shown after selection)
               if (currentLanguage.isNotEmpty)

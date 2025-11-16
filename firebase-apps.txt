@@ -2,9 +2,24 @@ dart pub global run flutterfire_cli:flutterfire configure
 
 Firebase configuration file lib\firebase_options.dart generated successfully with the following Firebase apps:
 
+i Firebase android app com.example.milk_manager_app is not registered on Firebase project milkmint-dev.
+i Registered a new Firebase android app on Firebase project milkmint-dev.
+i Firebase ios app com.example.milkManagerApp is not registered on Firebase project milkmint-dev.
+i Registered a new Firebase ios app on Firebase project milkmint-dev.
+i Firebase macos app com.example.milkManagerApp registered.
+i Firebase web app milk_manager_app (web) is not registered on Firebase project milkmint-dev.
+i Registered a new Firebase web app on Firebase project milkmint-dev.
+i Firebase windows app milk_manager_app (windows) is not registered on Firebase project milkmint-dev.
+i Registered a new Firebase windows app on Firebase project milkmint-dev.
+
+Firebase configuration file lib\firebase_options.dart generated successfully with the following Firebase apps:
+
 Platform  Firebase App Id
-web       1:404484728694:web:c22a84e4eff51ab9567c57
-android   1:404484728694:android:4f3338d92ef8cb2e567c57
-ios       1:404484728694:ios:16ebdece022b255a567c57
-macos     1:404484728694:ios:16ebdece022b255a567c57
-windows   1:404484728694:web:b156a1b8c78cb3c3567c57
+web       1:150118273896:web:a4923ca6cf28c562533cdd
+android   1:150118273896:android:ae467b7f084d6c50533cdd
+ios       1:150118273896:ios:83a7e3ccd0f4f066533cdd
+macos     1:150118273896:ios:83a7e3ccd0f4f066533cdd
+windows   1:150118273896:web:b37fcd4d154ee1ea533cdd
+
+Learn more about using this file and next steps from the documentation:
+ > https://firebase.google.com/docs/flutter/setup

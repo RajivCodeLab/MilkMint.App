@@ -57,6 +57,9 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.8.0
   # Note: hive_generator can be added separately if needed for specific models
+  
+  # App Icon Generator
+  flutter_launcher_icons: ^0.14.2
 
 flutter:
   uses-material-design: true
