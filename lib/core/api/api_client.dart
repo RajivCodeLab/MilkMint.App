@@ -14,6 +14,8 @@ class ApiClient {
   final Dio _dio;
   final AuthService _authService;
   final Ref _ref;
+  bool _isRefreshingToken = false;
+  bool _isLoggingOut = false;
 
   /// Setup Dio interceptors
   void _setupInterceptors() {
@@ -51,10 +53,18 @@ class ApiClient {
           final isAuthEndpoint = error.requestOptions.path.contains('/auth/');
           
           if (error.response?.statusCode == 401 && !isAuthEndpoint) {
+            // Prevent infinite loops
+            if (_isLoggingOut || _isRefreshingToken) {
+              debugPrint('⚠️ Already handling 401 - rejecting request');
+              return handler.reject(error);
+            }
+            
+            _isRefreshingToken = true;
             try {
-              // Refresh token
+              // Try to refresh token once
               final newToken = await _authService.getIdToken(forceRefresh: true);
               if (newToken != null) {
+                _isRefreshingToken = false;
                 // Retry request with new token
                 final opts = error.requestOptions;
                 opts.headers['Authorization'] = 'Bearer $newToken';
@@ -71,10 +81,14 @@ class ApiClient {
                 return handler.resolve(cloneReq);
               } else {
                 // Token refresh returned null - user needs to re-login
-                debugPrint('⚠️ Token refresh returned null - logging out user');
-                await _authService.signOut();
-                // Trigger auth provider logout to update UI state
-                _ref.read(authProviderNotifier).logout();
+                _isRefreshingToken = false;
+                if (!_isLoggingOut) {
+                  _isLoggingOut = true;
+                  debugPrint('⚠️ Token refresh returned null - logging out user');
+                  await _authService.signOut();
+                  // Trigger auth provider logout to update UI state
+                  _ref.read(authProviderNotifier).logout();
+                }
                 // Return error to stop further retries
                 return handler.reject(
                   DioException(
@@ -85,11 +99,15 @@ class ApiClient {
                 );
               }
             } catch (e) {
+              _isRefreshingToken = false;
               debugPrint('Token refresh failed: $e - logging out user');
               // Token refresh failed completely - log out the user
-              await _authService.signOut();
-              // Trigger auth provider logout to update UI state
-              _ref.read(authProviderNotifier).logout();
+              if (!_isLoggingOut) {
+                _isLoggingOut = true;
+                await _authService.signOut();
+                // Trigger auth provider logout to update UI state
+                _ref.read(authProviderNotifier).logout();
+              }
               // Return error to stop further retries
               return handler.reject(
                 DioException(

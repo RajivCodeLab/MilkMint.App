@@ -133,7 +133,7 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
 });
 
 /// Provider for Firebase ID token
-final firebaseIdTokenProvider = FutureProvider<String?>((ref) async {
+final firebaseIdTokenProvider = FutureProvider.autoDispose<String?>((ref) async {
   final authService = ref.watch(authServiceProvider);
   return await authService.getIdToken();
 });

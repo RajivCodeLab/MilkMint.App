@@ -78,15 +78,14 @@ class NotificationsScreen extends ConsumerWidget {
                 );
 
                 if (confirm == true && context.mounted) {
-                  await ref.read(notificationsNotifierProvider.notifier).clearAll();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('All notifications cleared'),
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  }
+                  // Backend API doesn't support bulk delete
+                  // Users can delete notifications individually via swipe
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please delete notifications individually by swiping'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 }
               }
             },

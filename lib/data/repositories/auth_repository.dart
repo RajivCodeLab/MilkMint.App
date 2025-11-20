@@ -48,6 +48,9 @@ abstract class AuthRepository {
 
   /// Update FCM token
   Future<void> updateFcmToken(String token);
+
+  /// Validate user still exists on backend
+  Future<void> validateUserExists();
 }
 
 /// Implementation of AuthRepository
@@ -219,5 +222,16 @@ class AuthRepositoryImpl implements AuthRepository {
     _isNewUser = false;
     
     return response.user;
+  }
+  
+  @override
+  Future<void> validateUserExists() async {
+    try {
+      // Call backend to verify user still exists and is valid
+      await _remoteDataSource.getCurrentUser();
+    } catch (e) {
+      // If 401/404, user is invalid
+      throw Exception('User no longer exists or is unauthorized');
+    }
   }
 }

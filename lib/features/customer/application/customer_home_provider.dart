@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/invoice/invoice.dart';
 import '../../../models/delivery/delivery_log.dart';
 import '../../../models/holiday/holiday.dart';
+import '../../../models/user_role.dart';
+import '../../common/application/holiday_provider.dart';
+import '../../auth/application/auth_provider.dart';
 
 /// Customer home state
 class CustomerHomeState {
@@ -89,39 +92,62 @@ class CustomerHomeNotifier extends StateNotifier<CustomerHomeState> {
     }
   }
 
-  /// Request holiday
+  /// Request holiday - now using real backend API
   Future<void> requestHoliday({
     required DateTime startDate,
     required DateTime endDate,
     String? reason,
+    required WidgetRef ref,
   }) async {
     try {
-      // TODO: Replace with actual API call
-      // await apiClient.post('/holidays', data: {
-      //   'startDate': startDate.toIso8601String(),
-      //   'endDate': endDate.toIso8601String(),
-      //   'reason': reason,
-      // });
+      // Get current user info from auth state
+      final authState = ref.read(authProvider);
+      User? user;
+      
+      authState.maybeWhen(
+        authenticated: (u) => user = u,
+        requiresOnboarding: (u) => user = u,
+        orElse: () => throw Exception('User not authenticated'),
+      );
 
-      await Future.delayed(const Duration(seconds: 1));
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
 
-      final newHoliday = Holiday(
-        id: 'HOL${state.activeHolidays.length + 1}',
-        customerId: 'CUST001',
-        vendorId: 'VENDOR001',
+      // Use HolidayRepository to create holiday via backend API
+      // For customers, use their MongoDB _id from the 'id' field
+      // vendorId field stores the vendor's ID for customers
+      final holidayRepository = ref.read(holidayRepositoryProvider);
+      final customerId = user!.id ?? user!.uid;
+      
+      if (customerId.isEmpty) {
+        throw Exception('Customer ID not found. Please complete onboarding.');
+      }
+      
+      final newHoliday = await holidayRepository.createHoliday(
+        customerId: customerId,
         startDate: startDate,
         endDate: endDate,
         reason: reason,
-        status: 'pending',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
+      // Backend will send notification to vendor automatically
+      // Update local state with new holiday
       state = state.copyWith(
         activeHolidays: [...state.activeHolidays, newHoliday],
       );
     } catch (e) {
-      state = state.copyWith(error: 'Failed to request holiday: $e');
+      // Parse error for better user message
+      String errorMessage = 'Failed to request holiday';
+      if (e.toString().contains('Customer with ID') && e.toString().contains('not found')) {
+        errorMessage = 'You are not registered as a customer yet. Please ask your milk vendor to add you to their customer list first.';
+      } else if (e.toString().contains('does not belong to vendor')) {
+        errorMessage = 'You are not associated with any vendor. Please contact your milk vendor.';
+      } else {
+        errorMessage = 'Failed to request holiday: ${e.toString()}';
+      }
+      
+      state = state.copyWith(error: errorMessage);
       rethrow;
     }
   }

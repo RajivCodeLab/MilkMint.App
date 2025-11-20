@@ -16,15 +16,29 @@ final holidayListProvider = StateNotifierProvider<HolidayNotifier, AsyncValue<Li
 });
 
 /// Upcoming holidays provider
-final upcomingHolidaysProvider = FutureProvider<List<Holiday>>((ref) async {
+final upcomingHolidaysProvider = FutureProvider.autoDispose<List<Holiday>>((ref) async {
   final repository = ref.watch(holidayRepositoryProvider);
-  return await repository.getUpcomingHolidays();
+  try {
+    return await repository.getUpcomingHolidays();
+  } catch (e) {
+    if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+      return [];
+    }
+    rethrow;
+  }
 });
 
 /// Customer holidays provider
-final customerHolidaysProvider = FutureProvider.family<List<Holiday>, String>((ref, customerId) async {
+final customerHolidaysProvider = FutureProvider.autoDispose.family<List<Holiday>, String>((ref, customerId) async {
   final repository = ref.watch(holidayRepositoryProvider);
-  return await repository.getCustomerHolidays(customerId);
+  try {
+    return await repository.getCustomerHolidays(customerId);
+  } catch (e) {
+    if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+      return [];
+    }
+    rethrow;
+  }
 });
 
 /// Holiday notifier

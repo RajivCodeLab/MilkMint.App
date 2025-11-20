@@ -307,14 +307,17 @@ class AppDrawer extends ConsumerWidget {
           
           debugPrint('🔴 Drawer closed, calling logout...');
           await authNotifier.logout();
-          debugPrint('🔴 Logout completed, navigating to splash...');
+          debugPrint('🔴 Logout completed, waiting for state to settle...');
           
-          // Navigate to splash which will redirect to language selection
+          // Wait a moment for auth state to update completely
+          await Future.delayed(const Duration(milliseconds: 100));
+          
+          // Navigate to language selection directly (bypassing splash check)
           if (context.mounted) {
-            debugPrint('🔴 Context is mounted, pushing splash route');
+            debugPrint('🔴 Context is mounted, navigating to language selection');
             Navigator.pushNamedAndRemoveUntil(
               context,
-              AppRoutes.splash,
+              AppRoutes.languageSelection,
               (route) => false, // Remove all previous routes
             );
             debugPrint('🔴 Navigation completed');

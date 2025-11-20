@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../../features/auth/application/auth_provider.dart';
+import '../../../../core/providers/notifications_provider.dart';
 import '../../application/dashboard_provider.dart';
 import '../../application/customer_provider.dart';
 import '../../application/delivery_log_provider.dart';
@@ -44,12 +44,52 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
             onPressed: _refreshDashboard,
             tooltip: 'Refresh',
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.notifications);
+          // Notification bell with unread badge
+          Consumer(
+            builder: (context, ref, child) {
+              final unreadCountAsync = ref.watch(unreadNotificationsCountProvider);
+              final unreadCount = unreadCountAsync.maybeWhen(
+                data: (count) => count,
+                orElse: () => 0,
+              );
+              
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.notifications);
+                    },
+                    tooltip: 'Notifications',
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          unreadCount > 9 ? '9+' : '$unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
-            tooltip: 'Notifications',
           ),
         ],
       ),
@@ -152,22 +192,9 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   }
 
   Widget _buildGreetingSection() {
-    final greeting = ref.watch(greetingProvider);
-    final greetingType = ref.watch(greetingIconProvider);
-    final user = ref.watch(currentUserProvider);
-    
-    IconData icon;
-    if (greetingType == 'morning') {
-      icon = Icons.wb_sunny_outlined;
-    } else if (greetingType == 'afternoon') {
-      icon = Icons.wb_sunny;
-    } else {
-      icon = Icons.nightlight_outlined;
-    }
-
-    final displayName = user?.firstName != null && user?.lastName != null
-        ? '${user!.firstName} ${user.lastName}'
-        : 'there';
+    final stats = ref.watch(dashboardStatsProvider);
+    final today = DateTime.now();
+    final dateStr = '${today.day} ${_getMonthName(today.month)} ${today.year}';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -182,37 +209,109 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
         ),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 32,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$greeting, $displayName!',
-                  style: AppTextStyles.titleMedium.copyWith(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Today\'s Summary',
+                style: AppTextStyles.titleMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  dateStr,
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Let\'s make today productive!',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryItem(
+                  'Completed',
+                  '${stats.completedDeliveries}/${stats.totalDeliveries}',
+                  Icons.check_circle_outline,
                 ),
-              ],
-            ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              Expanded(
+                child: _buildSummaryItem(
+                  'Pending',
+                  '${stats.pendingDeliveries}',
+                  Icons.pending_outlined,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              Expanded(
+                child: _buildSummaryItem(
+                  'Revenue',
+                  '₹${(stats.totalDailyQuantity * 50).toStringAsFixed(0)}',
+                  Icons.currency_rupee,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildSummaryItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: Colors.white,
+          size: 20,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
   }
 
   Widget _buildTodayStats() {

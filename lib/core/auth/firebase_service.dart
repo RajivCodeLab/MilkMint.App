@@ -136,6 +136,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 /// Provider for FCM token
-final fcmTokenProvider = FutureProvider<String?>((ref) async {
+final fcmTokenProvider = FutureProvider.autoDispose<String?>((ref) async {
   return await FirebaseService.getFCMToken();
 });

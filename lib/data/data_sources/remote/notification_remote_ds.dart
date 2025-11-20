@@ -51,6 +51,65 @@ class NotificationRemoteDataSource {
     }
   }
 
+  /// Get notification history with pagination
+  Future<Map<String, dynamic>> getNotifications({
+    int page = 1,
+    int limit = 20,
+    bool? isRead,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        '/notifications/history',
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          if (isRead != null) 'isRead': isRead,
+        },
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Get unread notifications count
+  Future<int> getUnreadCount() async {
+    try {
+      final response = await _apiClient.get('/notifications/unread-count');
+      return response.data['unreadCount'] ?? 0;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Mark notification as read
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _apiClient.patch('/notifications/$notificationId/read');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Mark all notifications as read
+  Future<void> markAllAsRead() async {
+    try {
+      await _apiClient.patch('/notifications/mark-all-read');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Delete a notification
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      await _apiClient.delete('/notifications/$notificationId');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Exception _handleError(DioException e) {
     if (e.response != null) {
       final message = e.response?.data['message'] ?? 'Notification operation failed';

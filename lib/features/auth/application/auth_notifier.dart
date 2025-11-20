@@ -32,8 +32,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final user = _repository.getCurrentUser();
       debugPrint('🔍 Current user: ${user?.phone}, role: ${user?.role.name}');
       if (user != null) {
-        state = AuthState.authenticated(user);
-        debugPrint('✅ User authenticated, navigating to home');
+        // Check if user has completed onboarding (has firstName and lastName)
+        final hasCompletedProfile = user.firstName != null && 
+                                    user.firstName!.isNotEmpty &&
+                                    user.lastName != null && 
+                                    user.lastName!.isNotEmpty;
+        
+        if (hasCompletedProfile) {
+          state = AuthState.authenticated(user);
+          debugPrint('✅ User authenticated with complete profile, navigating to home');
+        } else {
+          state = AuthState.requiresOnboarding(user);
+          debugPrint('⚠️ User authenticated but needs to complete onboarding');
+        }
         return;
       }
     }

@@ -41,6 +41,22 @@ class NotificationItem extends HiveObject {
     );
   }
 
+  /// Create from backend API JSON response
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    return NotificationItem(
+      id: json['_id'] ?? json['id'] ?? '',
+      title: json['title'] ?? '',
+      body: json['body'] ?? '',
+      type: json['type'] ?? 'general',
+      route: json['route'] as String?,
+      data: json['data'] as Map<String, dynamic>?,
+      timestamp: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt']) 
+          : DateTime.now(),
+      isRead: json['isRead'] ?? false,
+    );
+  }
+
   /// Mark as read
   void markAsRead() {
     isRead = true;

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../core/providers/notifications_provider.dart';
 import '../../../auth/application/auth_provider.dart';
 import '../../application/customer_home_provider.dart';
 import '../widgets/bill_summary_card.dart';
@@ -39,9 +40,61 @@ class _CustomerHomeScreenState extends ConsumerState<CustomerHomeScreen> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
+          // Notification bell with badge
+          Consumer(
+            builder: (context, ref, child) {
+              final unreadCountAsync = ref.watch(unreadNotificationsCountProvider);
+              return unreadCountAsync.when(
+                data: (count) => Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_outlined),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/notifications');
+                      },
+                      tooltip: 'Notifications',
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            count > 9 ? '9+' : count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                loading: () => IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/notifications');
+                  },
+                ),
+                error: (_, __) => IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/notifications');
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -169,6 +222,10 @@ class _CustomerHomeScreenState extends ConsumerState<CustomerHomeScreen> {
   }
 
   Widget _buildWelcomeHeader(String phone) {
+    final homeState = ref.watch(customerHomeProvider);
+    final today = DateTime.now();
+    final dateStr = DateFormat('EEEE, dd MMM').format(today);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -184,27 +241,99 @@ class _CustomerHomeScreenState extends ConsumerState<CustomerHomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.waving_hand, color: Colors.white),
-              const SizedBox(width: 8),
-              Text(
-                'Welcome Back!',
-                style: AppTextStyles.titleLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Today\'s Summary',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    dateStr,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ),
+              Icon(
+                Icons.local_drink,
+                color: Colors.white.withValues(alpha: 0.8),
+                size: 40,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildQuickStat(
+                  'Deliveries',
+                  '${homeState.deliveriesThisMonth}',
+                  Icons.check_circle_outline,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              Expanded(
+                child: _buildQuickStat(
+                  'This Month',
+                  '${homeState.totalLitersThisMonth.toStringAsFixed(1)}L',
+                  Icons.water_drop_outlined,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              Expanded(
+                child: _buildQuickStat(
+                  homeState.hasPendingDues ? 'Due' : 'Paid',
+                  homeState.hasPendingDues 
+                      ? '₹${homeState.pendingAmount.toStringAsFixed(0)}'
+                      : '✓',
+                  homeState.hasPendingDues ? Icons.payment : Icons.check_circle,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            phone,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickStat(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 20),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 10,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
@@ -546,17 +675,6 @@ class _CustomerHomeScreenState extends ConsumerState<CustomerHomeScreen> {
           const SnackBar(content: Text('Failed to open WhatsApp')),
         );
       }
-    }
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await ref.read(authProvider.notifier).logout();
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/login',
-        (route) => false,
-      );
     }
   }
 }

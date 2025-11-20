@@ -526,6 +526,7 @@ class _HolidayRequestScreenState extends ConsumerState<HolidayRequestScreen> {
             startDate: _startDate!,
             endDate: _endDate!,
             reason: _reasonController.text.isNotEmpty ? _reasonController.text : null,
+            ref: ref,
           );
 
       if (mounted) {

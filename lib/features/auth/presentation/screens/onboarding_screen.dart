@@ -23,6 +23,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _cityController = TextEditingController();
   final _pincodeController = TextEditingController();
   bool _isLoading = false;
+  bool _isDataLoaded = false;
 
   @override
   void dispose() {
@@ -33,6 +34,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _cityController.dispose();
     _pincodeController.dispose();
     super.dispose();
+  }
+
+  void _loadUserData(User user) {
+    if (_isDataLoaded) return;
+    
+    // Pre-populate existing user data if available
+    // For customers: Backend should populate these fields from the customers collection
+    // when assigning the customer role during /auth/resolve
+    if (user.firstName != null) _firstNameController.text = user.firstName!;
+    if (user.lastName != null) _lastNameController.text = user.lastName!;
+    if (user.email != null) _emailController.text = user.email!;
+    if (user.address != null) _addressController.text = user.address!;
+    if (user.city != null) _cityController.text = user.city!;
+    if (user.pincode != null) _pincodeController.text = user.pincode!;
+    
+    _isDataLoaded = true;
   }
 
   Future<void> _submitOnboarding() async {
@@ -111,6 +128,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildOnboardingForm(BuildContext context, User user) {
     final theme = Theme.of(context);
+    
+    // Load user data on first build
+    _loadUserData(user);
 
     return Scaffold(
       appBar: AppBar(
