@@ -262,20 +262,25 @@ class _EditCustomerScreenState extends ConsumerState<EditCustomerScreen> {
                     spacing: 8,
                     children: ['daily', 'alternate', 'weekly', 'custom'].map((frequency) {
                       final isSelected = _selectedFrequency == frequency;
-                      return ChoiceChip(
-                        label: Text(_getFrequencyLabel(frequency)),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedFrequency = frequency;
-                          });
-                        },
-                        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.6),
-                        selectedColor: AppColors.primary.withValues(alpha: 0.2),
-                        side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.border,
-                        ),
-                      );
+                        return ChoiceChip(
+                          label: Text(
+                            _getFrequencyLabel(frequency),
+                            style: isSelected
+                                ? const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)
+                                : null,
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedFrequency = frequency;
+                            });
+                          },
+                          selectedColor: AppColors.primary,
+                          backgroundColor: Colors.white,
+                          side: BorderSide(color: isSelected ? AppColors.primary : AppColors.border),
+                          elevation: isSelected ? 1 : 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        );
                     }).toList(),
                   ),
                 ],

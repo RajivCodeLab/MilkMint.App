@@ -1329,7 +1329,7 @@
     },
     "/api/v1/invoices/generate": {
       "post": {
-        "description": "Generate invoices for all customers for a given month. Skips customers with no deliveries.",
+        "description": "Generate invoices for all customers for a given month. Skips customers with no deliveries. Optionally provide `customerIds` in the request body to generate invoices only for a selected subset of customers.",
         "operationId": "InvoicesController_generateInvoices",
         "parameters": [],
         "requestBody": {
@@ -2366,7 +2366,6 @@
           }
         },
         "required": [
-          "customerId",
           "startDate",
           "endDate"
         ]
@@ -2467,6 +2466,16 @@
             "type": "boolean",
             "description": "Force regenerate even if invoices exist",
             "default": false
+          },
+          "customerIds": {
+            "description": "Optional list of customer IDs to generate invoices for (vendor-only)",
+            "example": [
+              "64a1f2d3e4b5c6a7b8c9d012"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

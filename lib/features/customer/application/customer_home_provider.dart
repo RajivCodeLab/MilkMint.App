@@ -5,6 +5,7 @@ import '../../../models/holiday/holiday.dart';
 import '../../../models/user_role.dart';
 import '../../common/application/holiday_provider.dart';
 import '../../auth/application/auth_provider.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Customer home state
 class CustomerHomeState {
@@ -59,36 +60,91 @@ class CustomerHomeState {
 
 /// Customer home notifier
 class CustomerHomeNotifier extends StateNotifier<CustomerHomeState> {
-  CustomerHomeNotifier() : super(CustomerHomeState());
+  final Ref _ref;
+
+  CustomerHomeNotifier(this._ref) : super(CustomerHomeState());
 
   /// Load customer home data
   Future<void> loadHomeData({String? customerId}) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // TODO: Replace with actual API calls
-      // final billResponse = await apiClient.get('/invoices/current?customerId=$customerId');
-      // final deliveriesResponse = await apiClient.get('/delivery-logs/recent?customerId=$customerId');
-      // final holidaysResponse = await apiClient.get('/holidays/active?customerId=$customerId');
+      // Determine customer ID from authenticated user
+      final authState = _ref.read(authProvider);
+      String userId = '';
+      bool usedFallback = false;
 
-      // Mock data for development
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final mockBill = _generateMockBill();
-      final mockDeliveries = _generateMockDeliveries();
-      final mockHolidays = _generateMockHolidays();
+      authState.maybeWhen(
+        authenticated: (user) {
+          if (user.id != null && user.id!.isNotEmpty) {
+            userId = user.id!;
+          } else {
+            userId = user.uid;
+            usedFallback = true;
+          }
+        },
+        requiresOnboarding: (user) {
+          if (user.id != null && user.id!.isNotEmpty) {
+            userId = user.id!;
+          } else {
+            userId = user.uid;
+            usedFallback = true;
+          }
+        },
+        orElse: () => throw Exception('User not authenticated'),
+      );
+
+      if (userId.isEmpty) throw Exception('User not authenticated');
+
+      final customerIdToUse = customerId ?? userId;
+
+      // Prepare parallel calls
+      final now = DateTime.now();
+      final month = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+
+      final invoiceDataSource = _ref.read(invoiceRemoteDataSourceProvider);
+      final deliveryDataSource = _ref.read(deliveryLogRemoteDataSourceProvider);
+
+      final results = await Future.wait([
+        invoiceDataSource.getInvoices(month: month, page: 1, limit: 1),
+        deliveryDataSource.getLogsByCustomer(
+          customerId: customerIdToUse,
+          startDate: now.subtract(const Duration(days: 10)),
+          endDate: now,
+        ),
+        _ref.read(customerHolidaysProvider(customerIdToUse).future),
+      ], eagerError: true);
+
+      final invoices = results[0] as List;
+      final currentBill = invoices.isNotEmpty ? invoices.first as Invoice : null;
+      final recentDeliveries = (results[1] as List<DeliveryLog>)
+        ..sort((a, b) => b.date.compareTo(a.date));
+      final activeHolidays = results[2] as List<Holiday>;
+
+      String? warning;
+      if (usedFallback) {
+        warning = 'Using Firebase UID as customer identifier; backend ObjectId missing locally.';
+      }
 
       state = state.copyWith(
-        currentMonthBill: mockBill,
-        recentDeliveries: mockDeliveries,
-        activeHolidays: mockHolidays,
+        currentMonthBill: currentBill,
+        recentDeliveries: recentDeliveries,
+        activeHolidays: activeHolidays,
         isLoading: false,
+        error: warning,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to load home data: $e',
-      );
+      if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Session expired. Please login again.',
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Failed to load home data: $e',
+        );
+      }
     }
   }
 
@@ -152,72 +208,11 @@ class CustomerHomeNotifier extends StateNotifier<CustomerHomeState> {
     }
   }
 
-  /// Generate mock bill
-  Invoice _generateMockBill() {
-    final now = DateTime.now();
-    final month = '${now.year}-${now.month.toString().padLeft(2, '0')}';
-    
-    return Invoice(
-      id: 'INV1',
-      invoiceId: 'INV-$month-001',
-      vendorId: 'VENDOR001',
-      customerId: 'CUST001',
-      month: month,
-      year: now.year,
-      totalLiters: 60.0,
-      amount: 3000.0,
-      pdfUrl: 'https://example.com/invoices/INV-$month-001.pdf',
-      paid: false,
-      generatedAt: DateTime.now().subtract(const Duration(days: 2)),
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      updatedAt: DateTime.now(),
-    );
-  }
-
-  /// Generate mock deliveries
-  List<DeliveryLog> _generateMockDeliveries() {
-    final now = DateTime.now();
-    final deliveries = <DeliveryLog>[];
-
-    for (int i = 0; i < 10; i++) {
-      final date = now.subtract(Duration(days: i));
-      deliveries.add(DeliveryLog(
-        id: 'LOG${i + 1}',
-        vendorId: 'VENDOR001',
-        customerId: 'CUST001',
-        date: date,
-        delivered: i % 4 != 0, // Every 4th day not delivered
-        quantityDelivered: i % 4 != 0 ? 2.0 : null,
-        timestamp: date,
-        synced: true,
-        syncedAt: date,
-      ));
-    }
-
-    return deliveries;
-  }
-
-  /// Generate mock holidays
-  List<Holiday> _generateMockHolidays() {
-    final now = DateTime.now();
-    return [
-      Holiday(
-        id: 'HOL1',
-        customerId: 'CUST001',
-        vendorId: 'VENDOR001',
-        startDate: now.add(const Duration(days: 10)),
-        endDate: now.add(const Duration(days: 15)),
-        reason: 'Vacation',
-        status: 'approved',
-        createdAt: now.subtract(const Duration(days: 3)),
-        updatedAt: now.subtract(const Duration(days: 2)),
-      ),
-    ];
-  }
+  // Removed mock generators; production data is fetched from remote data sources.
 }
 
 /// Customer home provider
 final customerHomeProvider =
     StateNotifierProvider<CustomerHomeNotifier, CustomerHomeState>(
-  (ref) => CustomerHomeNotifier(),
+  (ref) => CustomerHomeNotifier(ref),
 );

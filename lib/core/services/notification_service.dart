@@ -3,6 +3,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/customer/application/customer_home_provider.dart';
+import '../../features/customer/application/delivery_history_provider.dart';
+import '../../features/vendor/application/billing_provider.dart';
+import '../providers/notifications_provider.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../models/notification_item.dart';
 import '../storage/notifications_local_ds.dart';
@@ -493,6 +497,41 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
     messaging: messaging,
     notificationsLocalDataSource: notificationsLocalDataSource,
   );
+
+  // Listen for navigation/payload events and invalidate relevant providers
+  // so UI refreshes when notifications (invoice/holiday/delivery/etc.) arrive.
+  service.navigationStream.listen((payload) {
+    try {
+      switch (payload.type) {
+        case 'invoice':
+          ref.invalidate(billingProvider);
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadNotificationsCountProvider);
+          break;
+        case 'holiday':
+          ref.invalidate(customerHomeProvider);
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadNotificationsCountProvider);
+          break;
+        case 'delivery':
+          ref.invalidate(deliveryHistoryProvider);
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadNotificationsCountProvider);
+          break;
+        case 'customer':
+          ref.invalidate(customerHomeProvider);
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadNotificationsCountProvider);
+          break;
+        default:
+          // General notification: refresh notifications list & unread count
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadNotificationsCountProvider);
+      }
+    } catch (_) {
+      // Swallow errors to avoid crashing notification listeners
+    }
+  });
 
   ref.onDispose(() {
     service.dispose();

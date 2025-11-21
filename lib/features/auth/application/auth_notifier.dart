@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../core/services/notification_service.dart';
+import '../../customer/application/customer_home_provider.dart';
+import '../../customer/application/delivery_history_provider.dart';
+import '../../../core/providers/notifications_provider.dart';
 import '../../../models/user_role.dart';
 import 'auth_state.dart';
 
@@ -10,10 +13,12 @@ import 'auth_state.dart';
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   final NotificationService? _notificationService;
+  final Ref _ref;
   String? _verificationId;
 
   AuthNotifier(
-    this._repository, {
+    this._repository,
+    this._ref, {
     NotificationService? notificationService,
   })  : _notificationService = notificationService,
         super(const AuthState.initial()) {
@@ -93,6 +98,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.requiresOnboarding(user);
       } else {
         state = AuthState.authenticated(user);
+
+        // Invalidate customer-related providers so UI picks up canonical backend data
+        try {
+          _ref.invalidate(customerHomeProvider);
+          _ref.invalidate(notificationsProvider);
+          _ref.invalidate(unreadNotificationsCountProvider);
+          _ref.invalidate(deliveryHistoryProvider);
+        } catch (_) {}
       }
     } on firebase_auth.FirebaseAuthException catch (e) {
       debugPrint('🔴 Firebase Auth Error: ${e.code} - ${e.message}');
@@ -190,6 +203,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _subscribeToNotificationTopics(user);
 
       state = AuthState.authenticated(user);
+
+      // Refresh providers after onboarding completes
+      try {
+        _ref.invalidate(customerHomeProvider);
+        _ref.invalidate(notificationsProvider);
+        _ref.invalidate(unreadNotificationsCountProvider);
+        _ref.invalidate(deliveryHistoryProvider);
+      } catch (_) {}
     } catch (e) {
       debugPrint('🔴 Onboarding Error: $e');
       state = AuthState.error('Failed to complete onboarding: ${e.toString()}');
@@ -199,11 +220,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Subscribe to notification topics based on user role
   Future<void> _subscribeToNotificationTopics(User user) async {
     try {
+      // Prefer subscribing using backend MongoDB ObjectId when available
+      final primaryUserId = (user.id != null && user.id!.isNotEmpty) ? user.id! : user.uid;
+
       await _notificationService?.subscribeToUserTopics(
-        userId: user.uid,
+        userId: primaryUserId,
         role: user.role.name,
         vendorId: user.vendorId,
       );
+
+      // Also subscribe to Firebase UID topic for backward compatibility if different
+      if (user.id != null && user.id!.isNotEmpty && user.id != user.uid) {
+        await _notificationService?.subscribeToTopic('user_${user.uid}');
+      }
     } catch (e) {
       // Silently fail - not critical for auth flow
     }

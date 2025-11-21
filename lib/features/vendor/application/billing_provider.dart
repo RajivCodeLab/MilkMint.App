@@ -9,6 +9,7 @@ class BillingState {
   final bool isGenerating;
   final String? error;
   final String selectedMonth; // Format: "YYYY-MM"
+  final List<String>? lastGeneratedCustomerIds;
 
   BillingState({
     this.invoices = const [],
@@ -16,6 +17,7 @@ class BillingState {
     this.isGenerating = false,
     this.error,
     String? selectedMonth,
+    this.lastGeneratedCustomerIds,
   }) : selectedMonth = selectedMonth ?? _getCurrentMonth();
 
   static String _getCurrentMonth() {
@@ -29,6 +31,7 @@ class BillingState {
     bool? isGenerating,
     String? error,
     String? selectedMonth,
+    List<String>? lastGeneratedCustomerIds,
   }) {
     return BillingState(
       invoices: invoices ?? this.invoices,
@@ -36,6 +39,7 @@ class BillingState {
       isGenerating: isGenerating ?? this.isGenerating,
       error: error,
       selectedMonth: selectedMonth ?? this.selectedMonth,
+      lastGeneratedCustomerIds: lastGeneratedCustomerIds ?? this.lastGeneratedCustomerIds,
     );
   }
 
@@ -94,29 +98,52 @@ class BillingNotifier extends StateNotifier<BillingState> {
     }
   }
 
-  /// Generate invoice for a specific customer or all customers
-  Future<void> generateInvoice({String? customerId}) async {
+  /// Generate invoice for all customers or a subset.
+  ///
+  /// If `customerIds` is null or empty, generates for all customers.
+  /// Backend currently only supports batch generation for all customers
+  /// (`/invoices/generate`). To support generating for a selected subset,
+  /// we generate for all and then delete invoices for customers that were
+  /// not selected. This keeps the server as the source of truth while
+  /// providing the vendor UX to pick specific customers.
+  /// Generate invoices for a set of customers (or all when `customerIds` is null).
+  /// Returns the list of customerIds for which invoices exist after generation.
+  Future<List<String>> generateInvoice({List<String>? customerIds}) async {
     state = state.copyWith(isGenerating: true, error: null);
 
     try {
       final remoteDs = _ref.read(invoiceRemoteDataSourceProvider);
-      
-      // Note: API generateInvoices doesn't support customerId filter
-      // It generates for all customers in the month
+
+      // Generate invoices for the month. Backend now accepts optional
+      // `customerIds` to limit generation to a subset of customers.
       await remoteDs.generateInvoices(
         month: state.selectedMonth,
         force: false,
+        customerIds: customerIds,
       );
 
       // Reload invoices after generation
       await loadInvoices(month: state.selectedMonth);
 
-      state = state.copyWith(isGenerating: false);
+      // Determine which customers have invoices for the month
+      final generatedCustomerIds = state.invoices
+          .where((inv) => inv.month == state.selectedMonth)
+          .map((inv) => inv.customerId)
+          .toSet()
+          .toList();
+
+      state = state.copyWith(
+        isGenerating: false,
+        lastGeneratedCustomerIds: generatedCustomerIds,
+      );
+
+      return generatedCustomerIds;
     } catch (e) {
       state = state.copyWith(
         isGenerating: false,
         error: 'Failed to generate invoice: $e',
       );
+      rethrow;
     }
   }
 
@@ -130,12 +157,18 @@ class BillingNotifier extends StateNotifier<BillingState> {
     try {
       final remoteDs = _ref.read(invoiceRemoteDataSourceProvider);
       
-      await remoteDs.markInvoiceAsPaid(invoiceId);
-      
-      // Update local state optimistically
+      final updated = await remoteDs.markInvoiceAsPaid(invoiceId);
+
+      // Replace invoice in local state with returned invoice values
       final updatedInvoices = state.invoices.map((inv) {
         if (inv.invoiceId == invoiceId) {
-          return inv.copyWith(paid: true, paidAt: DateTime.now());
+          return inv.copyWith(
+            paid: updated.paid,
+            paidAt: updated.paidAt ?? DateTime.now(),
+            pdfUrl: updated.pdfUrl ?? inv.pdfUrl,
+            amount: updated.amount != 0 ? updated.amount : inv.amount,
+            totalLiters: updated.totalLiters != 0 ? updated.totalLiters : inv.totalLiters,
+          );
         }
         return inv;
       }).toList();

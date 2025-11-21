@@ -98,13 +98,50 @@ class BillingInvoiceCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: _buildInfoColumn(
-                    context,
-                    'Generated',
-                    invoice.generatedAt != null
-                        ? DateFormat('dd MMM').format(invoice.generatedAt!)
-                        : 'Pending',
-                    Icons.calendar_today,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today,
+                              size: 14,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white70
+                                  : AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Generated',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white70
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Tooltip(
+                            message:
+                                'PDF not yet generated. The invoice PDF and generation timestamp will appear here once ready.',
+                            preferBelow: false,
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 14,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white54
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        invoice.generatedAt != null
+                            ? DateFormat('dd MMM').format(invoice.generatedAt!)
+                            : 'Pending',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

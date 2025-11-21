@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../models/delivery/delivery_log.dart';
+import '../../../data/providers/remote_data_source_providers.dart';
 
 part 'delivery_history_provider.freezed.dart';
 
@@ -15,7 +16,9 @@ class DeliveryHistoryState with _$DeliveryHistoryState {
 }
 
 class DeliveryHistoryNotifier extends StateNotifier<DeliveryHistoryState> {
-  DeliveryHistoryNotifier() : super(const DeliveryHistoryState()) {
+  final Ref _ref;
+
+  DeliveryHistoryNotifier(this._ref) : super(const DeliveryHistoryState()) {
     _initialize();
   }
 
@@ -29,16 +32,20 @@ class DeliveryHistoryNotifier extends StateNotifier<DeliveryHistoryState> {
     state = state.copyWith(isLoading: true, error: null, selectedMonth: month);
 
     try {
-      // TODO: Replace with actual API call
-      // final response = await _apiClient.get('/delivery-logs?customerId=$customerId&month=${month.toIso8601String()}');
-      
-      await Future.delayed(const Duration(milliseconds: 500));
+      final deliveryDataSource = _ref.read(deliveryLogRemoteDataSourceProvider);
 
-      // Mock data: Generate deliveries for the selected month
-      final mockDeliveries = _generateMockDeliveries(customerId, month);
+      // Calculate month start and end
+      final startDate = DateTime(month.year, month.month, 1);
+      final endDate = DateTime(month.year, month.month + 1, 0);
+
+      final logs = await deliveryDataSource.getLogsByCustomer(
+        customerId: customerId,
+        startDate: startDate,
+        endDate: endDate,
+      );
 
       state = state.copyWith(
-        deliveries: mockDeliveries,
+        deliveries: logs,
         isLoading: false,
       );
     } catch (e) {
@@ -95,48 +102,10 @@ class DeliveryHistoryNotifier extends StateNotifier<DeliveryHistoryState> {
     return (totalDeliveries / state.deliveries.length) * 100;
   }
 
-  /// Generate mock data for development
-  List<DeliveryLog> _generateMockDeliveries(String customerId, DateTime month) {
-    final deliveries = <DeliveryLog>[];
-    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    final now = DateTime.now();
-
-    for (int day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(month.year, month.month, day);
-      
-      // Only generate for dates up to today
-      if (date.isAfter(now)) break;
-
-      // Skip some days randomly (holidays/no delivery)
-      if (day % 7 == 0 || day % 11 == 0) continue;
-
-      final delivered = day % 5 != 0; // Miss delivery every 5th day
-      
-      deliveries.add(
-        DeliveryLog(
-          id: 'log_${month.month}_$day',
-          vendorId: 'vendor_123',
-          customerId: customerId,
-          date: date,
-          delivered: delivered,
-          quantityDelivered: delivered ? 2.0 : 0.0,
-          notes: delivered 
-              ? null 
-              : day % 10 == 0 
-                  ? 'Holiday - No delivery requested'
-                  : 'Missed delivery',
-          timestamp: date.add(const Duration(hours: 6)),
-          synced: true,
-          syncedAt: date.add(const Duration(hours: 6, minutes: 5)),
-        ),
-      );
-    }
-
-    return deliveries;
-  }
+  // Mock generator removed; deliveries are fetched from backend via remote data source.
 }
 
 final deliveryHistoryProvider =
     StateNotifierProvider<DeliveryHistoryNotifier, DeliveryHistoryState>((ref) {
-  return DeliveryHistoryNotifier();
+  return DeliveryHistoryNotifier(ref);
 });

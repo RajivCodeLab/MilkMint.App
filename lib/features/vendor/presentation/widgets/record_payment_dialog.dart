@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../models/customer/customer.dart';
 
-/// Dialog to record a new payment
 class RecordPaymentDialog extends StatefulWidget {
   final List<Customer> customers;
   final Future<void> Function(

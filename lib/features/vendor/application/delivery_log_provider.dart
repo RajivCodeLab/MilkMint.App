@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import '../../../models/delivery/delivery_log.dart';
 import '../../../core/offline/offline_sync_service.dart';
+import '../../auth/application/auth_provider.dart';
+import '../../../models/user_role.dart';
 import '../../../data/providers/remote_data_source_providers.dart';
 
 /// Delivery log state
@@ -67,11 +69,23 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
   }
 
   void _initSyncListener() {
-    _syncService.syncStatusStream.listen((syncStatus) {
+    _syncService.syncStatusStream.listen((syncStatus) async {
+      // Update basic sync flags
       state = state.copyWith(
         isSyncing: syncStatus.isSyncing,
         pendingSyncCount: syncStatus.pendingCount,
       );
+
+      // When syncing finishes, reload logs to pick up authoritative server state.
+      // This avoids a race where a stale queued log temporarily overrides the
+      // server record in the UI.
+      if (!syncStatus.isSyncing) {
+        try {
+          await loadLogs(date: state.selectedDate);
+        } catch (_) {
+          // Ignore reload errors; state flags already updated above.
+        }
+      }
     });
   }
 
@@ -170,10 +184,21 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
       final selectedDate = state.selectedDate;
       final logDate = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
       
+      // Determine vendorId from authenticated user (prefer backend id)
+      final currentUser = _ref.read(currentUserProvider);
+      String vendorId = '';
+      if (currentUser != null) {
+        if (currentUser.role == UserRole.vendor) {
+          vendorId = currentUser.id ?? currentUser.uid;
+        } else {
+          vendorId = currentUser.vendorId ?? currentUser.id ?? currentUser.uid;
+        }
+      }
+
       final existingLog = state.todayLogs.firstWhere(
         (log) => log.customerId == customerId,
         orElse: () => DeliveryLog(
-          vendorId: 'vendor1', // TODO: Get from auth
+          vendorId: vendorId,
           customerId: customerId,
           date: logDate,
           delivered: false,
@@ -265,19 +290,12 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
       // Sync service handles the actual syncing
       await _syncService.syncDeliveryLogs();
 
-      // Update state with synced logs
-      final updatedLogs = state.logs.map((log) {
-        if (pendingLogs.any((p) => p.id == log.id)) {
-          return log.copyWith(synced: true);
-        }
-        return log;
-      }).toList();
+      // After syncing, reload logs from server and offline queue to ensure
+      // the UI reflects the authoritative server state. This avoids cases
+      // where a stale queued log (unsynced) overrides the server record.
+      await loadLogs(date: state.selectedDate);
 
-      state = state.copyWith(
-        logs: updatedLogs,
-        isSyncing: false,
-        pendingSyncCount: 0,
-      );
+      state = state.copyWith(isSyncing: false, pendingSyncCount: 0);
     } catch (e) {
       state = state.copyWith(
         isSyncing: false,
@@ -289,6 +307,14 @@ class DeliveryLogNotifier extends StateNotifier<DeliveryLogState> {
   Future<void> _trySyncIfOnline() async {
     // Sync service automatically handles connectivity
     await _syncService.syncDeliveryLogs();
+
+    // Reload logs after an automatic sync to pick up server-side changes
+    // (for example: server-marked deliveries should override stale queued logs).
+    try {
+      await loadLogs(date: state.selectedDate);
+    } catch (_) {
+      // Ignore reload errors - the important part is the sync attempt.
+    }
   }  void clearError() {
     state = state.copyWith(error: null);
   }

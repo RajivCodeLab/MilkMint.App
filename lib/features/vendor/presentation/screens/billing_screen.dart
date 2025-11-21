@@ -265,32 +265,176 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
   }
 
   Future<void> _generateInvoices() async {
+    // Show a multi-select dialog listing all customers so vendor can
+    // choose to generate for all or a selected subset.
+    final customerState = ref.read(customerProvider);
+    final customers = customerState.customers;
+
+    if (customers.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No customers to generate invoices for')),
+        );
+      }
+      return;
+    }
+
+    final selected = <String>{};
+    final allSelected = ValueNotifier<bool>(true);
+
+    // By default select all
+    for (final c in customers) {
+      selected.add(c.customerId);
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Generate Invoices'),
-        content: Text(
-          'Generate invoices for all customers for ${_formatMonth(ref.read(billingProvider).selectedMonth)}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Generate'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, dialogSetState) {
+            return AlertDialog(
+              title: const Text('Generate Invoices'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Select customers to generate invoices for ${_formatMonth(ref.read(billingProvider).selectedMonth)}'),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: allSelected,
+                          builder: (context, value, _) {
+                            return Checkbox(
+                              value: value,
+                              onChanged: (v) {
+                                final check = v ?? false;
+                                dialogSetState(() {
+                                  allSelected.value = check;
+                                  if (check) {
+                                    selected.clear();
+                                    for (final c in customers) {
+                                      selected.add(c.customerId);
+                                    }
+                                  } else {
+                                    selected.clear();
+                                  }
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Select All'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: customers.length,
+                        itemBuilder: (context, index) {
+                          final c = customers[index];
+                          final isSelected = selected.contains(c.customerId);
+                          return CheckboxListTile(
+                            value: isSelected,
+                            title: Text(c.name),
+                            subtitle: Text(c.phone),
+                            onChanged: (v) {
+                              dialogSetState(() {
+                                if (v == true) {
+                                  selected.add(c.customerId);
+                                } else {
+                                  selected.remove(c.customerId);
+                                }
+                                allSelected.value = selected.length == customers.length;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Generate'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
-      await ref.read(billingProvider.notifier).generateInvoice();
+      // If all selected, pass null to generate for all (server default).
+      final customerIds = selected.length == customers.length ? null : selected.toList();
+
+      List<String> generatedIds = const [];
+      try {
+        generatedIds = await ref.read(billingProvider.notifier).generateInvoice(customerIds: customerIds);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to generate invoices: $e')),
+          );
+        }
+        return;
+      }
+
+      // Map generated ids to customer names for display
+      final idToCustomer = {for (var c in customers) c.customerId: c};
+      final generatedCustomers = generatedIds.map((id) => idToCustomer[id]).where((c) => c != null).cast().toList();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invoices generated successfully')),
+        // Show summary dialog with list of customers included
+        await showDialog<void>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Invoices Generated'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Generated invoices for ${generatedCustomers.length} customers'),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: generatedCustomers.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final c = generatedCustomers[index];
+                          return ListTile(
+                            dense: true,
+                            title: Text(c.name),
+                            subtitle: Text(c.phone),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
         );
       }
     }
@@ -316,11 +460,21 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
     }
   }
 
-  void _markAsPaid(String invoiceId) {
-    ref.read(billingProvider.notifier).markAsPaid(invoiceId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invoice marked as paid')),
-    );
+  Future<void> _markAsPaid(String invoiceId) async {
+    try {
+      await ref.read(billingProvider.notifier).markAsPaid(invoiceId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invoice marked as paid')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to mark invoice as paid: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _shareInvoice(invoice) async {

@@ -32,7 +32,12 @@ class PaymentRemoteDataSource {
         },
       );
 
-      return Payment.fromJson(response.data);
+      final resp = response.data;
+      if (resp is Map<String, dynamic>) {
+        final normalized = _normalizePaymentJson(resp);
+        return Payment.fromJson(normalized);
+      }
+      return Payment.fromJson(resp as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -65,12 +70,31 @@ class PaymentRemoteDataSource {
         '/payments',
         queryParameters: queryParams,
       );
+      final resp = response.data;
 
-      final data = response.data as Map<String, dynamic>;
-      final payments = (data['data'] as List)
-          .map((json) => Payment.fromJson(json as Map<String, dynamic>))
-          .toList();
-      
+      List<dynamic> listData = [];
+
+      if (resp is Map<String, dynamic>) {
+        // support { data: [...] } wrapper
+        if (resp.containsKey('data') && resp['data'] is List) {
+          listData = resp['data'] as List<dynamic>;
+        } else if (resp.values.any((v) => v is List)) {
+          listData = resp.values.firstWhere((v) => v is List, orElse: () => <dynamic>[]) as List<dynamic>;
+        } else {
+          throw Exception('Unexpected payments response format');
+        }
+      } else if (resp is List) {
+        listData = resp;
+      } else {
+        throw Exception('Unexpected payments response type');
+      }
+
+      final payments = listData.map((json) {
+        final map = json as Map<String, dynamic>;
+        final normalized = _normalizePaymentJson(map);
+        return Payment.fromJson(normalized);
+      }).toList();
+
       return payments;
     } on DioException catch (e) {
       throw _handleError(e);
@@ -108,7 +132,11 @@ class PaymentRemoteDataSource {
       final response = await _apiClient.get('/payments/customer/$customerId');
 
       final payments = (response.data as List)
-          .map((json) => Payment.fromJson(json as Map<String, dynamic>))
+          .map((json) {
+            final map = json as Map<String, dynamic>;
+            final normalized = _normalizePaymentJson(map);
+            return Payment.fromJson(normalized);
+          })
           .toList();
       
       return payments;
@@ -123,7 +151,11 @@ class PaymentRemoteDataSource {
       final response = await _apiClient.get('/payments/invoice/$invoiceId');
 
       final payments = (response.data as List)
-          .map((json) => Payment.fromJson(json as Map<String, dynamic>))
+          .map((json) {
+            final map = json as Map<String, dynamic>;
+            final normalized = _normalizePaymentJson(map);
+            return Payment.fromJson(normalized);
+          })
           .toList();
       
       return payments;
@@ -136,7 +168,9 @@ class PaymentRemoteDataSource {
   Future<Payment> getPaymentById(String id) async {
     try {
       final response = await _apiClient.get('/payments/$id');
-      return Payment.fromJson(response.data);
+      final resp = response.data as Map<String, dynamic>;
+      final normalized = _normalizePaymentJson(resp);
+      return Payment.fromJson(normalized);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -171,5 +205,48 @@ class PaymentRemoteDataSource {
       return Exception(message);
     }
     return Exception('Network error: ${e.message}');
+  }
+
+  /// Normalize server payment JSON to the shape expected by `Payment.fromJson`.
+  ///
+  /// The backend returns `_id` and `paymentDate`/`createdAt` fields. The
+  /// `Payment` model expects `paymentId` and `timestamp`. This helper maps
+  /// `_id -> paymentId` and `paymentDate/createdAt -> timestamp`, preserving
+  /// other fields.
+  Map<String, dynamic> _normalizePaymentJson(Map<String, dynamic> json) {
+    final normalized = <String, dynamic>{}..addAll(json);
+
+    // Ensure paymentId exists
+    if (!normalized.containsKey('paymentId') && normalized.containsKey('_id')) {
+      normalized['paymentId'] = normalized['_id'];
+    }
+
+    // Map paymentDate or createdAt to timestamp (ISO string)
+    if (!normalized.containsKey('timestamp')) {
+      if (normalized.containsKey('paymentDate') && normalized['paymentDate'] != null) {
+        normalized['timestamp'] = normalized['paymentDate'];
+      } else if (normalized.containsKey('createdAt') && normalized['createdAt'] != null) {
+        normalized['timestamp'] = normalized['createdAt'];
+      } else if (normalized.containsKey('updatedAt') && normalized['updatedAt'] != null) {
+        normalized['timestamp'] = normalized['updatedAt'];
+      }
+    }
+
+    // If customerId is returned as object, extract its `_id`.
+    if (normalized.containsKey('customerId') && normalized['customerId'] is Map) {
+      final cust = normalized['customerId'] as Map<String, dynamic>;
+      if (cust.containsKey('_id')) {
+        normalized['customerId'] = cust['_id'];
+      }
+      // preserve customerName/customerPhone if provided separately
+      if (!normalized.containsKey('customerName') && cust.containsKey('name')) {
+        normalized['customerName'] = cust['name'];
+      }
+      if (!normalized.containsKey('customerPhone') && cust.containsKey('phone')) {
+        normalized['customerPhone'] = cust['phone'];
+      }
+    }
+
+    return normalized;
   }
 }

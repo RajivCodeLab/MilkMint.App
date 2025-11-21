@@ -43,6 +43,9 @@ class _VendorHolidaysScreenState extends ConsumerState<VendorHolidaysScreen>
         title: const Text('Holiday Requests'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'Pending', icon: Icon(Icons.schedule, size: 20)),
             Tab(text: 'Upcoming', icon: Icon(Icons.event_available, size: 20)),
@@ -178,7 +181,7 @@ class _VendorHolidaysScreenState extends ConsumerState<VendorHolidaysScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Customer ID: ${holiday.customerId}',
+                        'Customer: ${holiday.customerId}',
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

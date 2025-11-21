@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../core/providers/notifications_provider.dart';
+import '../../../common/application/holiday_provider.dart';
 import '../../application/dashboard_provider.dart';
 import '../../application/customer_provider.dart';
 import '../../application/delivery_log_provider.dart';
@@ -139,6 +140,12 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 24),
+
+              // Upcoming Holidays section
+             
+              const SizedBox(height: 12),
+              _buildUpcomingHolidaysCard(),
               const SizedBox(height: 24),
 
               // Recent Activity (placeholder)
@@ -408,39 +415,149 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
   }
 
   Widget _buildRecentActivity() {
-    // Placeholder for recent activity
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildActivityItem(
-              icon: Icons.add_circle_outline,
-              title: 'New customer added',
-              subtitle: 'Rajesh Kumar - 2 liters/day',
-              time: '2 hours ago',
-              color: AppColors.success,
+    final notificationsAsync = ref.watch(notificationsProvider);
+
+    return notificationsAsync.when(
+      data: (list) {
+        final items = list.take(3).toList();
+        if (items.isEmpty) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildActivityItem(
+                    icon: Icons.add_circle_outline,
+                    title: 'No recent activity',
+                    subtitle: 'Activities will appear here',
+                    time: '',
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
             ),
-            const Divider(),
-            _buildActivityItem(
-              icon: Icons.check_circle_outline,
-              title: 'Delivery completed',
-              subtitle: '32 out of 45 deliveries',
-              time: '3 hours ago',
-              color: AppColors.primary,
+          );
+        }
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: List.generate(items.length, (index) {
+                final n = items[index];
+                final icon = _iconForNotificationType(n.type);
+                final color = _colorForNotificationType(n.type);
+                final title = n.title.isNotEmpty ? n.title : _titleForNotification(n);
+                final subtitle = _subtitleForNotification(n);
+                final time = _timeAgo(n.timestamp);
+
+                return Column(
+                  children: [
+                    _buildActivityItem(
+                      icon: icon,
+                      title: title,
+                      subtitle: subtitle,
+                      time: time,
+                      color: color,
+                    ),
+                    if (index != items.length - 1) const Divider(),
+                  ],
+                );
+              }),
             ),
-            const Divider(),
-            _buildActivityItem(
-              icon: Icons.payment_outlined,
-              title: 'Payment received',
-              subtitle: 'Priya Sharma - ₹1,200',
-              time: 'Yesterday',
-              color: AppColors.accent,
-            ),
-          ],
+          ),
+        );
+      },
+      loading: () => const Center(child: Padding(
+        padding: EdgeInsets.all(24),
+        child: CircularProgressIndicator(),
+      )),
+      error: (_, __) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildActivityItem(
+                icon: Icons.error_outline,
+                title: 'Unable to load activity',
+                subtitle: 'Tap refresh to try again',
+                time: '',
+                color: AppColors.error,
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  IconData _iconForNotificationType(String type) {
+    switch (type) {
+      case 'payment':
+        return Icons.payment_outlined;
+      case 'delivery':
+        return Icons.check_circle_outline;
+      case 'customer':
+        return Icons.person_add_alt_1_outlined;
+      default:
+        return Icons.notifications_outlined;
+    }
+  }
+
+  Color _colorForNotificationType(String type) {
+    switch (type) {
+      case 'payment':
+        return AppColors.accent;
+      case 'delivery':
+        return AppColors.primary;
+      case 'customer':
+        return AppColors.success;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  String _titleForNotification(notification) {
+    // Fallback title when none provided
+    final type = notification.type ?? 'activity';
+    switch (type) {
+      case 'payment':
+        return 'Payment received';
+      case 'delivery':
+        return 'Delivery completed';
+      case 'customer':
+        return 'New customer added';
+      default:
+        return notification.title ?? 'Activity';
+    }
+  }
+
+  String _subtitleForNotification(n) {
+    final data = n.data as Map<String, dynamic>? ?? {};
+    if (n.type == 'payment') {
+      final name = data['customerName'] ?? data['customerPhone'] ?? '';
+      final amount = data['amount'] != null ? ' - ₹${data['amount']}' : '';
+      return '$name$amount';
+    }
+    if (n.type == 'customer') {
+      final name = data['name'] ?? '';
+      final qty = data['quantity'] != null ? ' - ${data['quantity']}L/day' : '';
+      return '$name$qty';
+    }
+    if (n.type == 'delivery') {
+      final completed = data['completed'] ?? '';
+      final total = data['total'] ?? '';
+      if (completed != '' && total != '') return '$completed out of $total deliveries';
+    }
+    return n.body ?? '';
+  }
+
+  String _timeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inDays > 0) return '${diff.inDays} day${diff.inDays > 1 ? 's' : ''} ago';
+    if (diff.inHours > 0) return '${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} ago';
+    if (diff.inMinutes > 0) return '${diff.inMinutes} min${diff.inMinutes > 1 ? 's' : ''} ago';
+    return 'Just now';
   }
 
   Widget _buildActivityItem({
@@ -484,6 +601,117 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildUpcomingHolidaysCard() {
+    final upcomingAsync = ref.watch(upcomingHolidaysProvider);
+
+    return upcomingAsync.when(
+      data: (holidays) {
+        if (holidays.isEmpty) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Upcoming Holidays', style: AppTextStyles.titleMedium),
+                  const SizedBox(height: 8),
+                  Text('No upcoming holidays', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final items = holidays.take(3).toList();
+
+        // Compact simple card version
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Upcoming Holidays', style: AppTextStyles.titleMedium),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, AppRoutes.holidays),
+                      child: const Text('View all'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ...items.map((h) {
+                  final days = h.endDate.difference(h.startDate).inDays + 1;
+                  return Column(
+                    children: [
+                      ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.beach_access, color: AppColors.warning, size: 20),
+                        ),
+                        title: Text(h.customerId, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                        subtitle: Text('${_formatDate(h.startDate)} → ${_formatDate(h.endDate)} • $days ${days == 1 ? 'day' : 'days'}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(h.status.toUpperCase(), style: AppTextStyles.labelSmall.copyWith(color: AppColors.success)),
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(width: 12),
+              Text('Loading upcoming holidays...'),
+            ],
+          ),
+        ),
+      ),
+      error: (e, st) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Unable to load upcoming holidays', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+              IconButton(
+                onPressed: () => ref.refresh(upcomingHolidaysProvider),
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime d) {
+    return '${d.day} ${_getMonthName(d.month)} ${d.year}';
   }
 
   Future<void> _refreshDashboard() async {

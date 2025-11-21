@@ -141,6 +141,14 @@ class AuthRepositoryImpl implements AuthRepository {
     await _localDataSource.saveUser(loginResponse.user);
     await _localDataSource.saveToken(loginResponse.token);
 
+    // Fetch canonical user profile from backend to ensure we have the MongoDB _id and latest fields
+    try {
+      final remoteUser = await _remoteDataSource.getCurrentUser();
+      await _localDataSource.saveUser(remoteUser);
+    } catch (e) {
+      // If fetching current user fails, continue with the loginResponse user
+    }
+
     return loginResponse.user;
   }
 

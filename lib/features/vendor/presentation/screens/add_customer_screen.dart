@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../models/customer/customer.dart';
+import '../../../auth/application/auth_provider.dart';
+import '../../../../models/user_role.dart';
 import '../../application/customer_provider.dart';
 
 /// Add customer screen
@@ -226,7 +228,12 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     children: ['daily', 'alternate', 'weekly', 'custom'].map((frequency) {
                       final isSelected = _selectedFrequency == frequency;
                       return ChoiceChip(
-                        label: Text(_getFrequencyLabel(frequency)),
+                        label: Text(
+                          _getFrequencyLabel(frequency),
+                          style: isSelected
+                              ? const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)
+                              : null,
+                        ),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
@@ -234,10 +241,12 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                           });
                         },
                         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.6),
-                        selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                        selectedColor: AppColors.primary,
                         side: BorderSide(
                           color: isSelected ? AppColors.primary : AppColors.border,
                         ),
+                        elevation: isSelected ? 1 : 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       );
                     }).toList(),
                   ),
@@ -319,9 +328,26 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     });
 
     try {
+      // Determine vendorId from authenticated user
+      final currentUser = ref.read(currentUserProvider);
+      String vendorId = '';
+      if (currentUser != null) {
+        if (currentUser.role == UserRole.vendor) {
+          vendorId = currentUser.id ?? currentUser.uid;
+        } else {
+          // If logged in as customer/delivery agent, use their linked vendorId
+          vendorId = currentUser.vendorId ?? currentUser.id ?? currentUser.uid;
+        }
+      }
+
+      if (vendorId.isEmpty) {
+        throw Exception('Vendor identity missing. Please complete vendor profile first.');
+      }
+
+      // Do not generate customerId on client. Backend (MongoDB) will assign an ObjectId.
       final customer = Customer(
-        customerId: DateTime.now().millisecondsSinceEpoch.toString(),
-        vendorId: 'vendor1', // TODO: Get from auth
+        customerId: '',
+        vendorId: vendorId,
         name: _nameController.text.trim(),
         phone: '+91${_phoneController.text.trim()}',
         address: _addressController.text.trim(),

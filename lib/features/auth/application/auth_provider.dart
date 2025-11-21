@@ -59,6 +59,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final notificationService = ref.watch(notificationServiceProvider);
   return AuthNotifier(
     repository,
+    ref,
     notificationService: notificationService,
   );
 });
